@@ -45,11 +45,13 @@ async def init_db():
         # Importar todos los modelos aquí para que Base los registre
         from app.models.usuario import Usuario
         from app.models.paciente import Paciente
+        from app.models.contacto_emergencia import ContactoEmergencia
         from app.models.triaje import Triaje
         from app.models.signos_vitales import SignosVitales
         from app.models.sintoma_triaje import SintomaTriaje
         from app.models.resultado_ia import ResultadoIA
+        from app.models.hce_antecedentes import HceAntecedentes
+        from app.models.hce_consulta_previa import HceConsultaPrevia
         from app.models.logs_auditoria import LogAuditoria
-        
-        # Crear todas las tablas
+
         await conn.run_sync(Base.metadata.create_all)
