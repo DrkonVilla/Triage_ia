@@ -42,7 +42,6 @@ async def get_db():
 # Función para inicializar la base de datos (usar solo en setup)
 async def init_db():
     async with engine.begin() as conn:
-        # Importar todos los modelos aquí para que Base los registre
         from app.models.usuario import Usuario
         from app.models.paciente import Paciente
         from app.models.contacto_emergencia import ContactoEmergencia
@@ -50,8 +49,8 @@ async def init_db():
         from app.models.signos_vitales import SignosVitales
         from app.models.sintoma_triaje import SintomaTriaje
         from app.models.resultado_ia import ResultadoIA
-        from app.models.hce_antecedentes import HceAntecedentes
-        from app.models.hce_consulta_previa import HceConsultaPrevia
+        from app.models.hce_antecedentes import HCEAntecedente
+        from app.models.hce_consulta_previa import HCEConsultaPrevia
         from app.models.logs_auditoria import LogAuditoria
 
         await conn.run_sync(Base.metadata.create_all)
