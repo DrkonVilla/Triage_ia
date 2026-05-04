@@ -133,6 +133,12 @@ async def startup_event():
         async with engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
         logger.info("Conexión a PostgreSQL establecida")
+        
+        # Crear tablas si no existen
+        from app.database import init_db
+        await init_db()
+        logger.info("✅ Tablas creadas/verificadas")
+        
     except Exception as e:
         logger.error(f"Error conectando a PostgreSQL: {str(e)}")
     
