@@ -19,7 +19,7 @@ services:
       - key: TELEGRAM_CHAT_ID
         sync: false
       - key: N8N_WEBHOOK_URL
-        value: http://triage-n8n:5678/webhook-test/webhook/critical-alert
+        value: https://triage-n8n.onrender.com/webhook-test/webhook/critical-alert
       - key: SECRET_KEY
         generateValue: true
     healthCheckPath: /health
@@ -35,8 +35,9 @@ services:
 
   - type: web
     name: triage-n8n
-    env: docker
-    image: n8nio/n8n:latest
+    env: image
+    image:
+      url: docker.io/n8nio/n8n:latest
     envVars:
       - key: N8N_BASIC_AUTH_ACTIVE
         value: "true"
