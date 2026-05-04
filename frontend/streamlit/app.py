@@ -315,7 +315,7 @@ if st.session_state.get('authenticated'):
         
         # Mostrar resumen de cola actual
         try:
-            response = requests.get("http://localhost:8000/api/v1/cola-medica/")
+            response = requests.get(f"{API_BASE_URL}/api/v1/cola-medica/")
             if response.status_code == 200:
                 cola = response.json()
                 en_espera = len([p for p in cola if p['estado_logistico'] == 'En Espera'])
