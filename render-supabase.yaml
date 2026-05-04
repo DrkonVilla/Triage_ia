@@ -1,0 +1,39 @@
+# Configuración para Render + Supabase (Stack Gratuito)
+# Este archivo usa Supabase para la base de datos en lugar de Render Postgres
+
+services:
+  - type: web
+    name: triage-fastapi
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false  # Configurar manualmente en dashboard con URL de Supabase
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: llama-3.3-70b-versatile
+      - key: OPENAI_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: N8N_WEBHOOK_URL
+        sync: false  # Configurar con URL de webhook de n8n Cloud
+      - key: SECRET_KEY
+        generateValue: true
+      - key: N8N_CLOUD_WEBHOOK
+        sync: false  # Ej: https://username.app.n8n.cloud/webhook/critical-alert
+    healthCheckPath: /health
+
+  - type: web
+    name: triage-streamlit
+    env: docker
+    dockerfilePath: ./frontend/streamlit/Dockerfile
+    plan: free
+    envVars:
+      - key: API_BASE_URL
+        value: https://triage-fastapi.onrender.com
+    healthCheckPath: /_stcore/health
