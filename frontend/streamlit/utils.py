@@ -5,7 +5,9 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 import os
 
+# Configuración de la API - Usar variable de entorno o valor por defecto
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000/api/v1")
+
 def get_auth_headers():
     """Retorna headers con token JWT si está disponible en session_state"""
     token = st.session_state.get('api_token')
@@ -29,7 +31,8 @@ def api_login(username: str, password: str) -> Optional[Dict]:
     try:
         response = requests.post(
             f"{API_BASE_URL}/auth/login",
-            json={"username": username, "password": password}
+            json={"username": username, "password": password},
+            timeout=10
         )
         if response.status_code == 200:
             return response.json()
@@ -46,7 +49,8 @@ def buscar_paciente(search_term: str) -> Optional[Dict]:
         response = requests.get(
             f"{API_BASE_URL}/pacientes/",
             params={"search": search_term, "limit": 5},
-            headers=headers
+            headers=headers,
+            timeout=10
         )
         if response.status_code == 200:
             pacientes = response.json()
@@ -63,7 +67,8 @@ def crear_paciente(paciente_data: Dict) -> Optional[Dict]:
         response = requests.post(
             f"{API_BASE_URL}/pacientes/",
             json=paciente_data,
-            headers=headers
+            headers=headers,
+            timeout=10
         )
         if response.status_code == 201:
             return response.json()
@@ -81,13 +86,13 @@ def crear_triaje(triaje_data: Dict) -> Optional[Dict]:
         response = requests.post(
             f"{API_BASE_URL}/triaje/",
             json=triaje_data,
-            headers=headers
+            headers=headers,
+            timeout=30
         )
         if response.status_code == 201:
             return response.json()
         elif response.status_code == 503:
             st.warning("⚠️ Servicio IA no disponible. El triaje se registró con nivel por defecto. Por favor revise manualmente.")
-            # Intentar obtener el triaje creado igualmente
             return response.json() if response.text else None
         else:
             st.error(f"Error: {response.text}")
@@ -103,7 +108,8 @@ def confirmar_nivel_urgencia(triaje_id: int, nivel_final: str) -> bool:
         response = requests.put(
             f"{API_BASE_URL}/triaje/{triaje_id}/confirmar",
             params={"nivel_final": nivel_final},
-            headers=headers
+            headers=headers,
+            timeout=10
         )
         return response.status_code == 200
     except:
@@ -123,7 +129,8 @@ def cambiar_estado_triaje(triaje_id: int, nuevo_estado: str, justificacion: str 
         response = requests.put(
             f"{API_BASE_URL}/cola-medica/{triaje_id}/estado",
             json=payload,
-            headers=headers
+            headers=headers,
+            timeout=10
         )
         if response.status_code == 200:
             return True, response.json().get('message', 'Éxito')
@@ -140,7 +147,8 @@ def obtener_antecedentes_hce(paciente_id: int) -> Optional[Dict]:
     try:
         response = requests.get(
             f"{API_BASE_URL}/hce/{paciente_id}",
-            headers=headers
+            headers=headers,
+            timeout=10
         )
         if response.status_code == 200:
             return response.json()
@@ -170,23 +178,82 @@ def get_urgency_label(level: str) -> str:
     }
     return labels.get(level, level)
 
-
 def obtener_dashboard_operativo(rango: str = "hoy") -> Optional[Dict]:
     """Obtiene datos en tiempo real para el dashboard operativo de enfermería
     
     Args:
-        rango: "hoy", "mes", o "total"
+        rango: "hoy", "dia", "semana", "mes", o "total"
     """
     headers = get_auth_headers()
     try:
+        hoy = datetime.now().date()
+        
+        # Calcular fechas según el rango
+        if rango == "hoy" or rango == "dia":
+            start_date = hoy
+            end_date = hoy
+        elif rango == "semana":
+            start_date = hoy - timedelta(days=7)
+            end_date = hoy
+        elif rango == "mes":
+            start_date = hoy - timedelta(days=30)
+            end_date = hoy
+        else:  # total
+            start_date = datetime(2024, 1, 1).date()
+            end_date = hoy
+        
         response = requests.get(
-            f"{API_BASE_URL}/reportes/dashboard-operativo",
+            f"{API_BASE_URL}/reportes/dashboard",
             headers=headers,
-            params={"rango": rango}
+            params={
+                "start_date": start_date.isoformat(),
+                "end_date": end_date.isoformat()
+            },
+            timeout=10
+        )
+        if response.status_code == 200:
+            return response.json()
+        else:
+            st.error(f"Error {response.status_code}: {response.text}")
+            return None
+    except requests.exceptions.Timeout:
+        st.error("Error: Tiempo de espera agotado. El servidor no responde.")
+        return None
+    except requests.exceptions.ConnectionError:
+        st.error("Error: No se puede conectar al servidor. Verifica que el backend esté corriendo.")
+        return None
+    except Exception as e:
+        st.error(f"Error cargando dashboard: {str(e)}")
+        return None
+
+def obtener_cola_medica() -> Optional[list]:
+    """Obtiene la lista de pacientes en cola médica"""
+    headers = get_auth_headers()
+    try:
+        response = requests.get(
+            f"{API_BASE_URL}/cola-medica/",
+            headers=headers,
+            timeout=10
         )
         if response.status_code == 200:
             return response.json()
         return None
     except Exception as e:
-        st.error(f"Error cargando dashboard: {str(e)}")
+        st.error(f"Error cargando cola médica: {str(e)}")
+        return None
+
+def obtener_triajes_paciente(paciente_id: int) -> Optional[list]:
+    """Obtiene el historial de triajes de un paciente"""
+    headers = get_auth_headers()
+    try:
+        response = requests.get(
+            f"{API_BASE_URL}/triajes/paciente/{paciente_id}",
+            headers=headers,
+            timeout=10
+        )
+        if response.status_code == 200:
+            return response.json()
+        return None
+    except Exception as e:
+        st.error(f"Error cargando historial: {str(e)}")
         return None
