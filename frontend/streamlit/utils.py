@@ -3,9 +3,9 @@ import requests
 import json
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
+import os
 
-API_BASE_URL = "http://localhost:8000/api/v1"
-
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000/api/v1")
 def get_auth_headers():
     """Retorna headers con token JWT si está disponible en session_state"""
     token = st.session_state.get('api_token')
