@@ -6,7 +6,10 @@ from typing import Optional, Dict, Any
 import os
 
 # Configuración de la API - Usar variable de entorno o valor por defecto
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000/api/v1")
+# Normalizar para evitar duplicación de /api/v1
+_raw_url = os.getenv("API_BASE_URL", "http://localhost:8000/api/v1")
+# Remover /api/v1 del final si existe, luego agregarlo una sola vez
+API_BASE_URL = _raw_url.rstrip("/").removesuffix("/api/v1") + "/api/v1"
 
 def get_auth_headers():
     """Retorna headers con token JWT si está disponible en session_state"""
