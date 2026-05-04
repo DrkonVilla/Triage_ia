@@ -1,0 +1,191 @@
+[{
+  "name": "Sincronización HCE",
+  "active": false,
+  "nodes": [
+    {
+      "id": "cron-trigger",
+      "name": "⏰ Cada 5 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "query-pending",
+      "name": "Triajes no sync",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [450, 300],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT t.id, t.paciente_id, t.nivel_urgencia_final, t.motivo_consulta, t.diagnostico_final, t.fecha_hora, p.dni, p.nombre_completo, p.edad FROM triajes t JOIN pacientes p ON t.paciente_id = p.id WHERE t.hce_sync = false AND t.estado_logistico = 'Atendido' ORDER BY t.fecha_hora LIMIT 5;"
+      },
+      "credentials": {
+        "postgres": "triage-postgres"
+      }
+    },
+    {
+      "id": "has-pending",
+      "name": "¿Hay pendientes?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-1",
+              "leftValue": "={{ $input.all().length }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "format-hce",
+      "name": "Formatear FHIR Bundle",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 200],
+      "parameters": {
+        "jsCode": "const triajes = $input.all().map(item => item.json);\nconst bundle = {\n  resourceType: 'Bundle',\n  type: 'collection',\n  entry: triajes.map(t => ({\n    resource: {\n      resourceType: 'Encounter',\n      id: `encounter-${t.id}`,\n      status: 'finished',\n      subject: {\n        reference: `Patient/${t.paciente_id}`,\n        display: t.nombre_completo\n      },\n      period: {\n        start: t.fecha_hora\n      },\n      reasonCode: [{\n        text: t.motivo_consulta || 'Sin motivo'\n      }],\n      diagnosis: [{\n        condition: {\n          text: t.diagnostico_final || 'Sin diagnóstico'\n        }\n      }]\n    }\n  }))\n};\nreturn [{ json: bundle }];"
+      }
+    },
+    {
+      "id": "send-hce",
+      "name": "POST HCE",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1050, 200],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.MOCK_HCE_URL }}/fhir/bundle",
+        "sendBody": true,
+        "body": {
+          "contentType": "application/json",
+          "content": "={{ JSON.stringify($json) }}"
+        }
+      }
+    },
+    {
+      "id": "mark-synced",
+      "name": "Marcar sync=true",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1250, 200],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ `UPDATE triajes SET hce_sync = true, hce_sync_at = NOW() WHERE id IN (${$('Triajes no sync').all().map(i => i.json.id).join(',')});` }}"
+      },
+      "credentials": {
+        "postgres": "triage-postgres"
+      }
+    },
+    {
+      "id": "log-empty",
+      "name": "Log: Sin pendientes",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [850, 400]
+    }
+  ],
+  "connections": {
+    "⏰ Cada 5 min": {
+      "main": [
+        [
+          {
+            "node": "Triajes no sync",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Triajes no sync": {
+      "main": [
+        [
+          {
+            "node": "¿Hay pendientes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Hay pendientes?": {
+      "main": [
+        [
+          {
+            "node": "Formatear FHIR Bundle",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log: Sin pendientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear FHIR Bundle": {
+      "main": [
+        [
+          {
+            "node": "POST HCE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST HCE": {
+      "main": [
+        [
+          {
+            "node": "Marcar sync=true",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "hce",
+      "id": "tag-hce"
+    },
+    {
+      "name": "batch",
+      "id": "tag-batch"
+    }
+  ]
+}]

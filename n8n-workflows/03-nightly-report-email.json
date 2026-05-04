@@ -1,0 +1,112 @@
+{
+  "name": "📧 Reporte Nocturno - Gerencia",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "hour": 23,
+          "minute": 59
+        }
+      },
+      "id": "cron-nightly",
+      "name": "Schedule Trigger (23:59)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH dia_stats AS (SELECT COUNT(*) as total_triajes, AVG(EXTRACT(EPOCH FROM (updated_at - created_at))/60) as tiempo_promedio, COUNT(CASE WHEN nivel_urgencia_final IN ('RED','ORANGE') THEN 1 END) as criticos FROM triajes WHERE DATE(created_at) = CURRENT_DATE AND activo = true), discrepancia_stats AS (SELECT COUNT(*) as discrepancia_count FROM triajes WHERE DATE(created_at) = CURRENT_DATE AND nivel_urgencia_asignado_ia != nivel_urgencia_final AND activo = true) SELECT json_build_object('fecha', CURRENT_DATE, 'total_triajes', d.total_triajes, 'tiempo_promedio', ROUND(d.tiempo_promedio::numeric, 2), 'criticos', d.criticos, 'discrepancias', s.discrepancia_count, 'tasa_concurrencia', ROUND(((d.total_triajes - s.discrepancia_count)::numeric / NULLIF(d.total_triajes, 0) * 100), 1)) as reporte FROM dia_stats d, discrepancia_stats s;"
+      },
+      "id": "query-stats",
+      "name": "Obtener Estadísticas del Día",
+      "type": "n8n-nodes-base.postgres",
+      "position": [450, 300],
+      "credentials": {
+        "postgres": "PostgreSQL Connection"
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "http://fastapi:8000/api/v1/reportes/shift-pdf",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "fecha",
+              "value": "={{$json.reporte.fecha}}"
+            },
+            {
+              "name": "stats",
+              "value": "={{$json.reporte}}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "generate-pdf",
+      "name": "Generar PDF (FastAPI)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{$env.SMTP_USER}}",
+        "toEmail": "={{$env.REPORT_RECIPIENT}}",
+        "subject": "🔬 Reporte Diario de Triaje - {{new Date().toLocaleDateString('es-CL')}}",
+        "text": "📊 *RESUMEN DEL DÍA*\n\n📅 Fecha: {{$node[\"Obtener Estadísticas del Día\"].json.reporte.fecha}}\n📋 Total Triajes: {{$node[\"Obtener Estadísticas del Día\"].json.reporte.total_triajes}}\n⏱️ Tiempo Promedio: {{$node[\"Obtener Estadísticas del Día\"].json.reporte.tiempo_promedio}} minutos\n🔴 Pacientes Críticos: {{$node[\"Obtener Estadísticas del Día\"].json.reporte.criticos}}\n🔄 Discrepancias IA: {{$node[\"Obtener Estadísticas del Día\"].json.reporte.discrepancias}}\n📈 Tasa Concurrencia: {{$node[\"Obtener Estadísticas del Día\"].json.reporte.tasa_concurrencia}}%\n\n---\nSistema de Triaje Asistido por IA\nReporte generado automáticamente.",
+        "attachments": {
+          "attachedFilename": "={{`reporte-triaje-${new Date().toISOString().split('T')[0]}.pdf`}}"
+        }
+      },
+      "id": "email-send",
+      "name": "Enviar Email con PDF",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [850, 300],
+      "credentials": {
+        "smtp": "SMTP Connection"
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO logs_auditoria (usuario_id, accion, modulo, registro_id, datos_nuevos, ip_address) VALUES (NULL, 'REPORT_EMAIL', 'reporte_diario', 0, jsonb_build_object('fecha', CURRENT_DATE, 'total_triajes', {{$node[\"Obtener Estadísticas del Día\"].json.reporte.total_triajes}}), 'n8n');"
+      },
+      "id": "log-report",
+      "name": "Log de Reporte",
+      "type": "n8n-nodes-base.postgres",
+      "position": [1050, 300],
+      "credentials": {
+        "postgres": "PostgreSQL Connection"
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (23:59)": {
+      "main": [[{"node": "Obtener Estadísticas del Día", "type": "main", "index": 0}]]
+    },
+    "Obtener Estadísticas del Día": {
+      "main": [[{"node": "Generar PDF (FastAPI)", "type": "main", "index": 0}]]
+    },
+    "Generar PDF (FastAPI)": {
+      "main": [[{"node": "Enviar Email con PDF", "type": "main", "index": 0}]]
+    },
+    "Enviar Email con PDF": {
+      "main": [[{"node": "Log de Reporte", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": ["reports", "email", "nightly"],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-15T10:00:00.000Z"
+}

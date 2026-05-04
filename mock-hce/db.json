@@ -1,0 +1,19 @@
+{
+  "pacientes": [
+    {
+      "id": 1,
+      "nombre": "Paciente Demo",
+      "dni": "12345678"
+    }
+  ],
+  "api": {
+    "v1": {
+      "pacientes": [
+        {
+          "id": 1,
+          "nombre": "Paciente Demo"
+        }
+      ]
+    }
+  }
+}

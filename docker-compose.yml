@@ -1,0 +1,166 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: triage-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-triaje_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-triaje_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-triaje_db}
+      TZ: America/Santiago
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U triaje_user -d triaje_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - triage-network
+
+  # FastAPI Backend
+  fastapi:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: triage-fastapi
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-triaje_user}:${POSTGRES_PASSWORD:-triaje_pass}@postgres:5432/${POSTGRES_DB:-triaje_db}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SECRET_KEY: ${SECRET_KEY:-your-super-secret-key-change-in-production}
+      N8N_WEBHOOK_CRITICAL_ALERT: http://n8n:5678/webhook/critical-alert
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - triage-network
+
+  # Streamlit Clinical App
+  streamlit:
+    build:
+      context: ./frontend/streamlit
+      dockerfile: Dockerfile
+    container_name: triage-streamlit
+    environment:
+      API_BASE_URL: http://fastapi:8000/api/v1
+    ports:
+      - "8501:8501"
+    depends_on:
+      - fastapi
+    volumes:
+      - ./frontend/streamlit:/app
+    command: streamlit run app.py --server.port=8501 --server.address=0.0.0.0
+    networks:
+      - triage-network
+
+  # React Admin App (build en producción)
+  react-admin:
+    build:
+      context: ./frontend/react
+      dockerfile: Dockerfile
+    container_name: triage-react
+    environment:
+      VITE_API_URL: http://localhost:8000/api/v1
+    ports:
+      - "5173:5173"
+    depends_on:
+      - fastapi
+    volumes:
+      - ./frontend/react:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+    networks:
+      - triage-network
+
+  # n8n Workflow Engine
+  n8n:
+    image: n8nio/n8n:1.50.0
+    container_name: triage-n8n
+    restart: unless-stopped
+    environment:
+      TZ: America/Santiago
+      # Deshabilitado auth para desarrollo local
+      N8N_USER_MANAGEMENT_DISABLED: "true"
+      N8N_BASIC_AUTH_ACTIVE: "false"
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      # Base de datos (PostgreSQL, no SQLite)
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n_db
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:-triaje_user}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-triaje_pass}
+      # Credenciales de servicios externos
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      REPORT_RECIPIENT: ${REPORT_RECIPIENT}
+      MOCK_HCE_URL: http://mock-hce:8080
+      # SMTP para n8n (envío de emails de verificación)
+      N8N_SMTP_HOST: ${SMTP_HOST}
+      N8N_SMTP_PORT: ${SMTP_PORT:-587}
+      N8N_SMTP_USER: ${SMTP_USER}
+      N8N_SMTP_PASS: ${SMTP_PASSWORD}
+      N8N_SMTP_SENDER: ${SMTP_USER:-n8n@hospital.com}
+    ports:
+      - "127.0.0.1:5678:5678"   # SOLO localhost, no expuesto externamente
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n-workflows:/home/node/workflows:ro  # Solo lectura
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:5678/healthz', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - triage-network
+
+  # Mock HCE Service (Simulador)
+  mock-hce:
+    image: kennethreitz/httpbin
+    container_name: triage-mock-hce
+    ports:
+      - "8080:80"
+    networks:
+      - triage-network
+
+  # PgAdmin (Opcional - para administración DB)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: triage-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@hospital.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - triage-network
+
+volumes:
+  postgres_data:
+  n8n_data:
+  pgadmin_data:
+
+networks:
+  triage-network:
+    driver: bridge

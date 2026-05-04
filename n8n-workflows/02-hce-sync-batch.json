@@ -1,0 +1,166 @@
+{
+  "name": "🔄 Sincronización HCE (Batch)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{"minutes": 5}]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Schedule Trigger (cada 5 min)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT t.id, t.paciente_id, p.dni, p.nombres, p.apellidos, p.fecha_nacimiento, t.nivel_urgencia_final, t.motivo_consulta, t.created_at FROM triajes t JOIN pacientes p ON t.paciente_id = p.id WHERE t.activo = true AND (t.sincronizado_hce IS NULL OR t.sincronizado_hce = false) ORDER BY t.created_at ASC LIMIT 10;"
+      },
+      "id": "fetch-unsynced",
+      "name": "Obtener Triajes No Sincronizados",
+      "type": "n8n-nodes-base.postgres",
+      "position": [450, 300],
+      "credentials": {
+        "postgres": "PostgreSQL Connection"
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json.length}}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "has-items",
+      "name": "¿Hay registros?",
+      "type": "n8n-nodes-base.if",
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 5,
+        "options": {}
+      },
+      "id": "split-batch",
+      "name": "Split Batch",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.MOCK_HCE_URL}}/api/fhir/encounter",
+        "sendBody": true,
+        "method": "POST",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "resourceType",
+              "value": "Encounter"
+            },
+            {
+              "name": "status",
+              "value": "finished"
+            },
+            {
+              "name": "subject",
+              "value": "={{ { reference: `Patient/${$json.dni}` } }}"
+            },
+            {
+              "name": "period",
+              "value": "={{ { start: $json.created_at } }}"
+            },
+            {
+              "name": "reasonCode",
+              "value": "={{ [ { text: $json.motivo_consulta } ] }}"
+            },
+            {
+              "name": "priority",
+              "value": "={{ { coding: [ { code: $json.nivel_urgencia_final } ] } }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "http-hce",
+      "name": "Enviar a HCE Mock",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE triajes SET sincronizado_hce = true, fecha_sincronizacion_hce = NOW() WHERE id = {{$json.id}};"
+      },
+      "id": "mark-synced",
+      "name": "Marcar como Sincronizado",
+      "type": "n8n-nodes-base.postgres",
+      "position": [1250, 200],
+      "credentials": {
+        "postgres": "PostgreSQL Connection"
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO logs_auditoria (usuario_id, accion, modulo, registro_id, datos_nuevos, ip_address) VALUES (NULL, 'SYNC_HCE', 'sincronizacion', {{$json.id}}, jsonb_build_object('status', 'success'), 'n8n');"
+      },
+      "id": "log-sync",
+      "name": "Log de Sincronización",
+      "type": "n8n-nodes-base.postgres",
+      "position": [1450, 200],
+      "credentials": {
+        "postgres": "PostgreSQL Connection"
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "noop-end",
+      "name": "Finalizar",
+      "type": "n8n-nodes-base.noOp",
+      "position": [1650, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (cada 5 min)": {
+      "main": [[{"node": "Obtener Triajes No Sincronizados", "type": "main", "index": 0}]]
+    },
+    "Obtener Triajes No Sincronizados": {
+      "main": [[{"node": "¿Hay registros?", "type": "main", "index": 0}]]
+    },
+    "¿Hay registros?": {
+      "main": [
+        [{"node": "Split Batch", "type": "main", "index": 0}],
+        [{"node": "Finalizar", "type": "main", "index": 0}]
+      ]
+    },
+    "Split Batch": {
+      "main": [[{"node": "Enviar a HCE Mock", "type": "main", "index": 0}]]
+    },
+    "Enviar a HCE Mock": {
+      "main": [[{"node": "Marcar como Sincronizado", "type": "main", "index": 0}]]
+    },
+    "Marcar como Sincronizado": {
+      "main": [[{"node": "Log de Sincronización", "type": "main", "index": 0}]]
+    },
+    "Log de Sincronización": {
+      "main": [[{"node": "Finalizar", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": ["hce", "sync", "batch"],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-15T10:00:00.000Z"
+}

@@ -1,0 +1,39 @@
+{
+  "endpoints": [
+    {
+      "response": {
+        "statusCode": 200,
+        "body": "{\"resourceType\": \"Bundle\", \"type\": \"transaction-response\", \"success\": true}",
+        "latency": 100
+      },
+      "method": "post",
+      "endpoint": "/api/fhir/encounter"
+    },
+    {
+      "response": {
+        "statusCode": 200,
+        "body": "{\"resourceType\": \"Patient\", \"id\": \"mock-001\", \"active\": true}",
+        "latency": 50
+      },
+      "method": "get",
+      "endpoint": "/api/fhir/patient/:id"
+    },
+    {
+      "response": {
+        "statusCode": 200,
+        "body": "{\"success\": true, \"message\": \"Paciente sincronizado correctamente\", \"hce_id\": \"HCE-12345\"}",
+        "latency": 100
+      },
+      "method": "post",
+      "endpoint": "/api/v1/pacientes"
+    },
+    {
+      "response": {
+        "statusCode": 200,
+        "body": "[{\"id\": 1, \"nombre\": \"Paciente Demo\"}]"
+      },
+      "method": "get",
+      "endpoint": "/api/v1/pacientes"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-100;
+  }
+}
+
+.react-date-range {
+  font-family: inherit !important;
+}
+
+.react-date-range .rdrMonth {
+  width: 100% !important;
+}

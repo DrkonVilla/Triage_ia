@@ -1,0 +1,174 @@
+[{
+  "name": "Reporte Nocturno Email",
+  "active": false,
+  "nodes": [
+    {
+      "id": "cron-2359",
+      "name": "⏰ 23:59 diario",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        },
+        "triggerAtHour": 23,
+        "triggerAtMinute": 59
+      }
+    },
+    {
+      "id": "stats-query",
+      "name": "Estadísticas del día",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [450, 300],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as total_triajes, AVG(EXTRACT(EPOCH FROM (t.updated_at - t.created_at))/60) as tiempo_promedio_min, COUNT(CASE WHEN t.nivel_urgencia_final = 'RED' THEN 1 END) as criticos, COUNT(CASE WHEN t.nivel_urgencia_final != t.nivel_urgencia_asignado_ia THEN 1 END) as discrepancias FROM triajes t WHERE DATE(t.created_at) = CURRENT_DATE;"
+      },
+      "credentials": {
+        "postgres": "triage-postgres"
+      }
+    },
+    {
+      "id": "nivel-query",
+      "name": "Por nivel urgencia",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [450, 450],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT nivel_urgencia_final, COUNT(*) as cantidad FROM triajes WHERE DATE(created_at) = CURRENT_DATE GROUP BY nivel_urgencia_final;"
+      },
+      "credentials": {
+        "postgres": "triage-postgres"
+      }
+    },
+    {
+      "id": "fetch-pdf",
+      "name": "Generar PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [650, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "http://fastapi:8000/api/v1/reportes/shift-pdf",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "rango",
+              "value": "hoy"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "format-email",
+      "name": "Formatear Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "parameters": {
+        "jsCode": "const stats = $('Estadísticas del día').all()[0].json;\nconst niveles = $('Por nivel urgencia').all().map(i => i.json);\nconst hoy = new Date().toLocaleDateString('es-CL');\n\nconst total = stats.total_triajes || 0;\nconst tiempo = stats.tiempo_promedio_min ? Math.round(stats.tiempo_promedio_min * 10) / 10 : 0;\nconst criticos = stats.criticos || 0;\nconst discrepancias = stats.discrepancias || 0;\nconst tasa = total > 0 ? Math.round(((total - discrepancias) / total) * 1000) / 10 : 0;\n\nlet nivelesText = niveles.map(n => `- ${n.nivel_urgencia_final}: ${n.cantidad}`).join('\\n');\n\nconst body = `📊 *Reporte Diario de Triaje - ${hoy}*\\n\\n📅 Fecha: ${hoy}\\n📋 Total Triajes: ${total}\\n⏱️ Tiempo Promedio: ${tiempo} minutos\\n🔴 Pacientes Críticos: ${criticos}\\n🔄 Discrepancias IA: ${discrepancias}\\n📈 Tasa Concurrencia: ${tasa}%\\n\\n📊 Distribución por nivel:\\n${nivelesText}\\n\\n[Reporte PDF adjunto]`;\n\nreturn [{ json: { to: process.env.REPORT_RECIPIENT, subject: `📊 Reporte Diario de Triaje - ${hoy}`, body: body } }];"
+      }
+    },
+    {
+      "id": "send-email",
+      "name": "Enviar Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "parameters": {
+        "fromEmail": "={{ $env.SMTP_USER }}",
+        "toEmail": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.body }}",
+        "attachments": "={{ [{ binary: $('Generar PDF').binary }] }}"
+      },
+      "credentials": {
+        "smtp": "triage-smtp"
+      }
+    }
+  ],
+  "connections": {
+    "⏰ 23:59 diario": {
+      "main": [
+        [
+          {
+            "node": "Estadísticas del día",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Por nivel urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estadísticas del día": {
+      "main": [
+        [
+          {
+            "node": "Generar PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar PDF": {
+      "main": [
+        [
+          {
+            "node": "Formatear Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear Email": {
+      "main": [
+        [
+          {
+            "node": "Enviar Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "report",
+      "id": "tag-report"
+    },
+    {
+      "name": "email",
+      "id": "tag-email"
+    }
+  ]
+}]
