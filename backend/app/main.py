@@ -6,6 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 import logging
 from datetime import datetime
 import httpx
+import os
 
 from app.routers import auth, pacientes, triaje, cola_medica, hce, auditoria, reportes
 from app.database import engine, Base
@@ -23,16 +24,27 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# CORS
+# ============================================
+# CORS - Configuración CORREGIDA
+# ============================================
+# Obtener orígenes permitidos desde variable de entorno o usar lista por defecto
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "https://triage-streamlit-production.up.railway.app,http://localhost:8501,http://localhost:5173,http://localhost:8000"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En producción, especificar orígenes
+    allow_origins=ALLOWED_ORIGINS,  # Lista específica, no "*"
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
+# ============================================
 # Routers
+# ============================================
 app.include_router(auth.router)
 app.include_router(pacientes.router)
 app.include_router(triaje.router)
@@ -41,13 +53,39 @@ app.include_router(hce.router)
 app.include_router(auditoria.router)
 app.include_router(reportes.router)
 
-# Health check
+# ============================================
+# Endpoints públicos
+# ============================================
+
+@app.get("/")
+async def root():
+    """Endpoint raíz - información básica del sistema"""
+    return {
+        "name": "Sistema de Triaje Clínico Asistido por IA",
+        "version": "1.0.0",
+        "status": "operational",
+        "docs_url": "/docs",
+        "health_url": "/health"
+    }
+
 @app.get("/health")
 async def health_check():
+    """Health check para Railway y monitoreo"""
     ia_configured = bool(settings.OPENAI_API_KEY and 
-                        (settings.OPENAI_API_KEY.startswith("sk-") or settings.OPENAI_API_KEY.startswith("gsk_")))
-    is_groq = settings.OPENAI_BASE_URL and "groq" in settings.OPENAI_BASE_URL
-    provider = "groq" if is_groq else "openai"
+                        (settings.OPENAI_API_KEY.startswith("sk-") or 
+                         settings.OPENAI_API_KEY.startswith("gsk_") or
+                         settings.OPENAI_API_KEY.startswith("gl-") or
+                         len(settings.OPENAI_API_KEY) > 20))
+    
+    is_groq = settings.OPENAI_BASE_URL and "groq" in str(settings.OPENAI_BASE_URL).lower()
+    is_openai = not is_groq and settings.OPENAI_API_KEY and settings.OPENAI_API_KEY.startswith("sk-")
+    
+    if is_groq:
+        provider = "groq"
+    elif is_openai:
+        provider = "openai"
+    else:
+        provider = "unknown"
     
     return {
         "status": "healthy",
@@ -63,7 +101,7 @@ async def test_ia_connection():
     """Endpoint para probar la conexión con OpenAI/Groq"""
     from app.services.ia_service import ia_service
     
-    is_groq = settings.OPENAI_BASE_URL and "groq" in settings.OPENAI_BASE_URL
+    is_groq = settings.OPENAI_BASE_URL and "groq" in str(settings.OPENAI_BASE_URL).lower()
     provider = "Groq" if is_groq else "OpenAI"
     
     try:
@@ -107,54 +145,6 @@ async def test_ia_connection():
             "suggestion": f"Verifique que la API Key sea valida en {suggestion}"
         }
 
-# Manejador global de excepciones para conflictos de concurrencia
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    if exc.status_code == status.HTTP_409_CONFLICT:
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={
-                "success": False,
-                "error": "CONCURRENCY_ERROR",
-                "message": exc.detail,
-                "suggestion": "Por favor recargue los datos y reintente"
-            }
-        )
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"success": False, "message": exc.detail}
-    )
-
-@app.on_event("startup")
-async def startup_event():
-    logger.info("Iniciando FastAPI Backend...")
-    # Verificar conexión a DB
-    try:
-        async with engine.connect() as conn:
-            await conn.execute(text("SELECT 1"))
-        logger.info("Conexión a PostgreSQL establecida")
-        
-        # Crear tablas si no existen
-        from app.database import init_db
-        await init_db()
-        logger.info("✅ Tablas creadas/verificadas")
-        
-    except Exception as e:
-        logger.error(f"Error conectando a PostgreSQL: {str(e)}")
-    
-    # Verificar configuración de IA (OpenAI o Groq)
-    is_groq = settings.OPENAI_BASE_URL and "groq" in settings.OPENAI_BASE_URL
-    provider = "Groq" if is_groq else "OpenAI"
-    
-    is_valid_key = settings.OPENAI_API_KEY and (
-        settings.OPENAI_API_KEY.startswith("sk-") or settings.OPENAI_API_KEY.startswith("gsk_")
-    )
-    
-    if is_valid_key:
-        logger.info(f"✅ {provider} configurado (Modelo: {settings.OPENAI_MODEL})")
-    else:
-        logger.warning("⚠️  ADVERTENCIA: API Key de IA no configurada")
-
 @app.post("/trigger-critical-alert")
 async def trigger_critical_alert(data: dict):
     """Dispara alerta crítica a n8n via webhook"""
@@ -174,10 +164,121 @@ async def trigger_critical_alert(data: dict):
     except Exception as e:
         logger.error(f"Error al enviar alerta crítica: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
-        logger.warning("   La funcionalidad de IA no estara disponible")
-        logger.warning("   Configure en .env: OPENAI_API_KEY + OPENAI_BASE_URL (para Groq)")
+
+# ============================================
+# Manejadores de excepciones globales
+# ============================================
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Manejador personalizado para errores HTTP"""
+    if exc.status_code == status.HTTP_409_CONFLICT:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "success": False,
+                "error": "CONCURRENCY_ERROR",
+                "message": exc.detail,
+                "suggestion": "Por favor recargue los datos y reintente"
+            }
+        )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"success": False, "message": exc.detail}
+    )
+
+@app.exception_handler(SQLAlchemyError)
+async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
+    """Manejador para errores de base de datos"""
+    logger.error(f"Error de base de datos: {str(exc)}")
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "success": False,
+            "error": "DATABASE_ERROR",
+            "message": "Error en la base de datos. Por favor intente más tarde."
+        }
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Manejador global para errores no controlados"""
+    logger.error(f"Error no controlado: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "success": False,
+            "error": "INTERNAL_ERROR",
+            "message": "Error interno del servidor. Por favor intente más tarde."
+        }
+    )
+
+# ============================================
+# Eventos de ciclo de vida
+# ============================================
+
+@app.on_event("startup")
+async def startup_event():
+    """Inicialización al arrancar el servidor"""
+    logger.info("=" * 50)
+    logger.info("Iniciando FastAPI Backend - Sistema de Triaje IA")
+    logger.info("=" * 50)
+    
+    # 1. Verificar conexión a PostgreSQL
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        logger.info("✅ Conexión a PostgreSQL establecida")
+    except Exception as e:
+        logger.error(f"❌ Error conectando a PostgreSQL: {str(e)}")
+        logger.error("   El sistema no funcionará correctamente sin base de datos")
+    
+    # 2. Crear tablas si no existen
+    try:
+        from app.database import init_db
+        await init_db()
+        logger.info("✅ Tablas creadas/verificadas")
+    except Exception as e:
+        logger.error(f"❌ Error creando tablas: {str(e)}")
+    
+    # 3. Verificar configuración de IA (OpenAI o Groq)
+    is_groq = settings.OPENAI_BASE_URL and "groq" in str(settings.OPENAI_BASE_URL).lower()
+    provider = "Groq" if is_groq else "OpenAI"
+    
+    is_valid_key = bool(settings.OPENAI_API_KEY and len(settings.OPENAI_API_KEY) > 10)
+    
+    if is_valid_key:
+        logger.info(f"✅ {provider} configurado (Modelo: {settings.OPENAI_MODEL})")
+        logger.info(f"   Base URL: {settings.OPENAI_BASE_URL or 'https://api.openai.com/v1'}")
+    else:
+        logger.warning("⚠️  ADVERTENCIA: API Key de IA no configurada")
+        logger.warning("   La funcionalidad de IA no estará disponible")
+        logger.warning("   Configure en .env: OPENAI_API_KEY y OPENAI_BASE_URL (para Groq)")
+    
+    # 4. Información de CORS
+    logger.info(f"🌐 CORS permitido para: {ALLOWED_ORIGINS}")
+    
+    # 5. Resumen final
+    logger.info("=" * 50)
+    logger.info("🚀 Servidor listo para recibir peticiones")
+    logger.info("=" * 50)
 
 @app.on_event("shutdown")
 async def shutdown_event():
+    """Limpieza al apagar el servidor"""
     logger.info("Cerrando conexiones...")
     await engine.dispose()
+    logger.info("✅ Conexiones cerradas correctamente")
+
+# ============================================
+# Punto de entrada para desarrollo local
+# ============================================
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )
