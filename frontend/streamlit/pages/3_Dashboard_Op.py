@@ -14,7 +14,8 @@ from components.auth_persistence import verify_and_restore_session
 st.set_page_config(page_title="Dashboard Operativo", page_icon="📊", layout="wide")
 
 # Intentar restaurar sesión si no está autenticado
-API_BASE_URL = "http://localhost:8000"
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000/api/v1")
+
 if not st.session_state.get('authenticated'):
     if verify_and_restore_session(API_BASE_URL):
         st.rerun()
