@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from utils import *
 import sys
 import os
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000/api/v1")
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 # Agregar parent al path para importar auth_persistence
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from components.auth_persistence import verify_and_restore_session

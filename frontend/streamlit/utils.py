@@ -58,7 +58,7 @@ def buscar_paciente(search_term: str) -> Optional[Dict]:
         if response.status_code == 200:
             pacientes = response.json()
             if pacientes:
-                return pacientes[0]  # Retorna el primero
+                return pacientes[0]
         return None
     except:
         return None
@@ -181,41 +181,35 @@ def get_urgency_label(level: str) -> str:
     }
     return labels.get(level, level)
 
+# ============================================
+# FUNCIÓN CORREGIDA - Usa el endpoint correcto
+# ============================================
 def obtener_dashboard_operativo(rango: str = "hoy") -> Optional[Dict]:
-    """Obtiene datos en tiempo real para el dashboard operativo de enfermería
+    """
+    Obtiene datos en tiempo real para el dashboard operativo de enfermería
     
     Args:
-        rango: "hoy", "dia", "semana", "mes", o "total"
+        rango: "hoy", "mes", o "total"
     """
     headers = get_auth_headers()
+    
     try:
-        hoy = datetime.now().date()
-        
-        # Calcular fechas según el rango
-        if rango == "hoy" or rango == "dia":
-            start_date = hoy
-            end_date = hoy
-        elif rango == "semana":
-            start_date = hoy - timedelta(days=7)
-            end_date = hoy
-        elif rango == "mes":
-            start_date = hoy - timedelta(days=30)
-            end_date = hoy
-        else:  # total
-            start_date = datetime(2024, 1, 1).date()
-            end_date = hoy
+        # Usar el endpoint correcto: /dashboard-operativo (no /dashboard)
+        url = f"{API_BASE_URL}/reportes/dashboard-operativo"
+        params = {"rango": rango}  # Parámetro 'rango', no fechas
         
         response = requests.get(
-            f"{API_BASE_URL}/reportes/dashboard",
+            url,
             headers=headers,
-            params={
-                "start_date": start_date.isoformat(),
-                "end_date": end_date.isoformat()
-            },
+            params=params,
             timeout=10
         )
+        
         if response.status_code == 200:
             return response.json()
+        elif response.status_code == 403:
+            st.error("⚠️ Acceso denunciado. El dashboard operativo requiere rol de enfermería.")
+            return None
         else:
             st.error(f"Error {response.status_code}: {response.text}")
             return None

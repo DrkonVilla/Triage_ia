@@ -137,7 +137,13 @@ if st.session_state.get('show_registro_paciente', False):
             nombres = st.text_input("Nombres *", key="nuevo_nombres")
             apellidos = st.text_input("Apellidos *", key="nuevo_apellidos")
         with col2:
-            fecha_nac = st.date_input("Fecha de Nacimiento *", key="nuevo_fecha")
+            fecha_nac = st.date_input(
+                "Fecha de Nacimiento *",
+                key="nuevo_fecha",
+                min_value=date(1950, 1, 1),
+                max_value=date.today(),
+                value=date(1990, 1, 1)
+            )
             genero = st.selectbox("Género", ["M", "F", "Otros"], key="nuevo_genero")
             telefono = st.text_input("Teléfono", key="nuevo_telefono")
         with col3:

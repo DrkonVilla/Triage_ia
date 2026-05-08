@@ -118,6 +118,27 @@ if not st.session_state.get('authenticated'):
         
         submitted = st.form_submit_button("🚀 Ingresar al Sistema", use_container_width=True, type="primary")
     
+    # Credenciales de ejemplo para copiar y pegar
+    st.markdown("""
+    <div style="background: #f5f5f5; border-radius: 12px; padding: 16px; margin-top: 24px; border: 1px solid #e0e0e0;">
+        <p style="font-size: 13px; font-weight: 600; color: #424242; margin: 0 0 12px 0;">
+            👤 Credenciales de prueba (copiar y pegar):
+        </p>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e0e0e0; flex: 1; min-width: 140px;">
+                <p style="font-size: 12px; color: #616161; margin: 0 0 4px 0;">Enfermera</p>
+                <p style="font-size: 14px; font-family: monospace; background: #f5f5f5; padding: 4px 8px; border-radius: 4px; margin: 0;">enfermera1</p>
+                <p style="font-size: 14px; font-family: monospace; background: #f5f5f5; padding: 4px 8px; border-radius: 4px; margin: 4px 0 0 0;">password123</p>
+            </div>
+            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e0e0e0; flex: 1; min-width: 140px;">
+                <p style="font-size: 12px; color: #616161; margin: 0 0 4px 0;">Médico</p>
+                <p style="font-size: 14px; font-family: monospace; background: #f5f5f5; padding: 4px 8px; border-radius: 4px; margin: 0;">medico1</p>
+                <p style="font-size: 14px; font-family: monospace; background: #f5f5f5; padding: 4px 8px; border-radius: 4px; margin: 4px 0 0 0;">password123</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("""
         <p style="text-align: center; margin-top: 24px; font-size: 12px; color: #9E9E9E;">
             © 2024 Hospital Clínico. Todos los derechos reservados.
