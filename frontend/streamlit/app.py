@@ -5,12 +5,13 @@ import requests
 from datetime import datetime
 import pandas as pd
 import os
+from pathlib import Path
 
 # Importar utilidades de autenticación
 from utils import get_auth_headers
 from components.auth_persistence import (
-    verify_and_restore_session, 
-    persist_login, 
+    verify_and_restore_session,
+    persist_login,
     logout_and_clear,
     sync_token_from_storage
 )
@@ -23,8 +24,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
-with open('assets/styles.css', encoding='utf-8') as f:
+# Custom CSS - Usar ruta absoluta para compatibilidad con Streamlit Cloud
+BASE_DIR = Path(__file__).parent  # directorio donde está app.py
+with open(BASE_DIR / 'assets' / 'styles.css', encoding='utf-8') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 _secrets_paths = [
