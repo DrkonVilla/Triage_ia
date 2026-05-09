@@ -2,12 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict iTP79f67o3Or4rFVpkrxBNqg9cDkEa2WBEzpA7PWlVEHGRRmJvfPeCSAvLPBDB3
+\restrict dGoSDuDhf3R7Dhk9r3scXo9RoNWPl5UpjwiRcIpUzbiiavU8AYZrhsoYm5TIFcJ
 
 -- Dumped from database version 16.13
 -- Dumped by pg_dump version 16.13
-
--- Started on 2026-05-09 17:10:00
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -21,7 +19,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 2 (class 3079 OID 59213)
 -- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -29,17 +26,14 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
 
 --
--- TOC entry 5086 (class 0 OID 0)
--- Dependencies: 2
--- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: -
 --
 
 COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
 
 
 --
--- TOC entry 246 (class 1255 OID 59453)
--- Name: update_updated_at_column(); Type: FUNCTION; Schema: public; Owner: postgres
+-- Name: update_updated_at_column(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION public.update_updated_at_column() RETURNS trigger
@@ -52,15 +46,12 @@ END;
 $$;
 
 
-ALTER FUNCTION public.update_updated_at_column() OWNER TO postgres;
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- TOC entry 221 (class 1259 OID 59260)
--- Name: contactos_emergencia; Type: TABLE; Schema: public; Owner: postgres
+-- Name: contactos_emergencia; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.contactos_emergencia (
@@ -76,11 +67,8 @@ CREATE TABLE public.contactos_emergencia (
 );
 
 
-ALTER TABLE public.contactos_emergencia OWNER TO postgres;
-
 --
--- TOC entry 220 (class 1259 OID 59259)
--- Name: contactos_emergencia_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: contactos_emergencia_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.contactos_emergencia_id_seq
@@ -92,20 +80,15 @@ CREATE SEQUENCE public.contactos_emergencia_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.contactos_emergencia_id_seq OWNER TO postgres;
-
 --
--- TOC entry 5088 (class 0 OID 0)
--- Dependencies: 220
--- Name: contactos_emergencia_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: contactos_emergencia_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.contactos_emergencia_id_seq OWNED BY public.contactos_emergencia.id;
 
 
 --
--- TOC entry 231 (class 1259 OID 59387)
--- Name: hce_antecedentes; Type: TABLE; Schema: public; Owner: triaje_user
+-- Name: hce_antecedentes; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.hce_antecedentes (
@@ -123,11 +106,8 @@ CREATE TABLE public.hce_antecedentes (
 );
 
 
-ALTER TABLE public.hce_antecedentes OWNER TO triaje_user;
-
 --
--- TOC entry 230 (class 1259 OID 59386)
--- Name: hce_antecedentes_id_seq; Type: SEQUENCE; Schema: public; Owner: triaje_user
+-- Name: hce_antecedentes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.hce_antecedentes_id_seq
@@ -139,20 +119,15 @@ CREATE SEQUENCE public.hce_antecedentes_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.hce_antecedentes_id_seq OWNER TO triaje_user;
-
 --
--- TOC entry 5090 (class 0 OID 0)
--- Dependencies: 230
--- Name: hce_antecedentes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: triaje_user
+-- Name: hce_antecedentes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.hce_antecedentes_id_seq OWNED BY public.hce_antecedentes.id;
 
 
 --
--- TOC entry 233 (class 1259 OID 59409)
--- Name: hce_consulta_previa; Type: TABLE; Schema: public; Owner: triaje_user
+-- Name: hce_consulta_previa; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.hce_consulta_previa (
@@ -169,11 +144,8 @@ CREATE TABLE public.hce_consulta_previa (
 );
 
 
-ALTER TABLE public.hce_consulta_previa OWNER TO triaje_user;
-
 --
--- TOC entry 232 (class 1259 OID 59408)
--- Name: hce_consulta_previa_id_seq; Type: SEQUENCE; Schema: public; Owner: triaje_user
+-- Name: hce_consulta_previa_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.hce_consulta_previa_id_seq
@@ -185,20 +157,15 @@ CREATE SEQUENCE public.hce_consulta_previa_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.hce_consulta_previa_id_seq OWNER TO triaje_user;
-
 --
--- TOC entry 5091 (class 0 OID 0)
--- Dependencies: 232
--- Name: hce_consulta_previa_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: triaje_user
+-- Name: hce_consulta_previa_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.hce_consulta_previa_id_seq OWNED BY public.hce_consulta_previa.id;
 
 
 --
--- TOC entry 235 (class 1259 OID 59429)
--- Name: logs_auditoria; Type: TABLE; Schema: public; Owner: postgres
+-- Name: logs_auditoria; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.logs_auditoria (
@@ -216,11 +183,8 @@ CREATE TABLE public.logs_auditoria (
 );
 
 
-ALTER TABLE public.logs_auditoria OWNER TO postgres;
-
 --
--- TOC entry 234 (class 1259 OID 59428)
--- Name: logs_auditoria_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: logs_auditoria_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.logs_auditoria_id_seq
@@ -232,20 +196,15 @@ CREATE SEQUENCE public.logs_auditoria_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.logs_auditoria_id_seq OWNER TO postgres;
-
 --
--- TOC entry 5093 (class 0 OID 0)
--- Dependencies: 234
--- Name: logs_auditoria_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: logs_auditoria_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.logs_auditoria_id_seq OWNED BY public.logs_auditoria.id;
 
 
 --
--- TOC entry 219 (class 1259 OID 59243)
--- Name: pacientes; Type: TABLE; Schema: public; Owner: postgres
+-- Name: pacientes; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.pacientes (
@@ -267,11 +226,8 @@ CREATE TABLE public.pacientes (
 );
 
 
-ALTER TABLE public.pacientes OWNER TO postgres;
-
 --
--- TOC entry 218 (class 1259 OID 59242)
--- Name: pacientes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: pacientes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.pacientes_id_seq
@@ -283,20 +239,15 @@ CREATE SEQUENCE public.pacientes_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.pacientes_id_seq OWNER TO postgres;
-
 --
--- TOC entry 5096 (class 0 OID 0)
--- Dependencies: 218
--- Name: pacientes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: pacientes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.pacientes_id_seq OWNED BY public.pacientes.id;
 
 
 --
--- TOC entry 229 (class 1259 OID 59365)
--- Name: resultados_ia; Type: TABLE; Schema: public; Owner: triaje_user
+-- Name: resultados_ia; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.resultados_ia (
@@ -315,11 +266,8 @@ CREATE TABLE public.resultados_ia (
 );
 
 
-ALTER TABLE public.resultados_ia OWNER TO triaje_user;
-
 --
--- TOC entry 228 (class 1259 OID 59364)
--- Name: resultados_ia_id_seq; Type: SEQUENCE; Schema: public; Owner: triaje_user
+-- Name: resultados_ia_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.resultados_ia_id_seq
@@ -331,20 +279,15 @@ CREATE SEQUENCE public.resultados_ia_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.resultados_ia_id_seq OWNER TO triaje_user;
-
 --
--- TOC entry 5098 (class 0 OID 0)
--- Dependencies: 228
--- Name: resultados_ia_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: triaje_user
+-- Name: resultados_ia_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.resultados_ia_id_seq OWNED BY public.resultados_ia.id;
 
 
 --
--- TOC entry 225 (class 1259 OID 59316)
--- Name: signos_vitales; Type: TABLE; Schema: public; Owner: triaje_user
+-- Name: signos_vitales; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.signos_vitales (
@@ -370,11 +313,8 @@ CREATE TABLE public.signos_vitales (
 );
 
 
-ALTER TABLE public.signos_vitales OWNER TO triaje_user;
-
 --
--- TOC entry 224 (class 1259 OID 59315)
--- Name: signos_vitales_id_seq; Type: SEQUENCE; Schema: public; Owner: triaje_user
+-- Name: signos_vitales_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.signos_vitales_id_seq
@@ -386,20 +326,15 @@ CREATE SEQUENCE public.signos_vitales_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.signos_vitales_id_seq OWNER TO triaje_user;
-
 --
--- TOC entry 5099 (class 0 OID 0)
--- Dependencies: 224
--- Name: signos_vitales_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: triaje_user
+-- Name: signos_vitales_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.signos_vitales_id_seq OWNED BY public.signos_vitales.id;
 
 
 --
--- TOC entry 227 (class 1259 OID 59344)
--- Name: sintomas_triaje; Type: TABLE; Schema: public; Owner: triaje_user
+-- Name: sintomas_triaje; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.sintomas_triaje (
@@ -416,11 +351,8 @@ CREATE TABLE public.sintomas_triaje (
 );
 
 
-ALTER TABLE public.sintomas_triaje OWNER TO triaje_user;
-
 --
--- TOC entry 226 (class 1259 OID 59343)
--- Name: sintomas_triaje_id_seq; Type: SEQUENCE; Schema: public; Owner: triaje_user
+-- Name: sintomas_triaje_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.sintomas_triaje_id_seq
@@ -432,20 +364,15 @@ CREATE SEQUENCE public.sintomas_triaje_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.sintomas_triaje_id_seq OWNER TO triaje_user;
-
 --
--- TOC entry 5100 (class 0 OID 0)
--- Dependencies: 226
--- Name: sintomas_triaje_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: triaje_user
+-- Name: sintomas_triaje_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.sintomas_triaje_id_seq OWNED BY public.sintomas_triaje.id;
 
 
 --
--- TOC entry 223 (class 1259 OID 59278)
--- Name: triajes; Type: TABLE; Schema: public; Owner: postgres
+-- Name: triajes; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.triajes (
@@ -474,11 +401,8 @@ CREATE TABLE public.triajes (
 );
 
 
-ALTER TABLE public.triajes OWNER TO postgres;
-
 --
--- TOC entry 222 (class 1259 OID 59277)
--- Name: triajes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: triajes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.triajes_id_seq
@@ -490,20 +414,15 @@ CREATE SEQUENCE public.triajes_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.triajes_id_seq OWNER TO postgres;
-
 --
--- TOC entry 5102 (class 0 OID 0)
--- Dependencies: 222
--- Name: triajes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: triajes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.triajes_id_seq OWNED BY public.triajes.id;
 
 
 --
--- TOC entry 217 (class 1259 OID 59225)
--- Name: usuarios; Type: TABLE; Schema: public; Owner: postgres
+-- Name: usuarios; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.usuarios (
@@ -523,11 +442,8 @@ CREATE TABLE public.usuarios (
 );
 
 
-ALTER TABLE public.usuarios OWNER TO postgres;
-
 --
--- TOC entry 216 (class 1259 OID 59224)
--- Name: usuarios_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: usuarios_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.usuarios_id_seq
@@ -539,101 +455,85 @@ CREATE SEQUENCE public.usuarios_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.usuarios_id_seq OWNER TO postgres;
-
 --
--- TOC entry 5105 (class 0 OID 0)
--- Dependencies: 216
--- Name: usuarios_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: usuarios_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.usuarios_id_seq OWNED BY public.usuarios.id;
 
 
 --
--- TOC entry 4803 (class 2604 OID 59263)
--- Name: contactos_emergencia id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: contactos_emergencia id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.contactos_emergencia ALTER COLUMN id SET DEFAULT nextval('public.contactos_emergencia_id_seq'::regclass);
 
 
 --
--- TOC entry 4832 (class 2604 OID 59390)
--- Name: hce_antecedentes id; Type: DEFAULT; Schema: public; Owner: triaje_user
+-- Name: hce_antecedentes id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.hce_antecedentes ALTER COLUMN id SET DEFAULT nextval('public.hce_antecedentes_id_seq'::regclass);
 
 
 --
--- TOC entry 4837 (class 2604 OID 59412)
--- Name: hce_consulta_previa id; Type: DEFAULT; Schema: public; Owner: triaje_user
+-- Name: hce_consulta_previa id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.hce_consulta_previa ALTER COLUMN id SET DEFAULT nextval('public.hce_consulta_previa_id_seq'::regclass);
 
 
 --
--- TOC entry 4842 (class 2604 OID 59432)
--- Name: logs_auditoria id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: logs_auditoria id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.logs_auditoria ALTER COLUMN id SET DEFAULT nextval('public.logs_auditoria_id_seq'::regclass);
 
 
 --
--- TOC entry 4798 (class 2604 OID 59246)
--- Name: pacientes id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: pacientes id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.pacientes ALTER COLUMN id SET DEFAULT nextval('public.pacientes_id_seq'::regclass);
 
 
 --
--- TOC entry 4827 (class 2604 OID 59368)
--- Name: resultados_ia id; Type: DEFAULT; Schema: public; Owner: triaje_user
+-- Name: resultados_ia id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.resultados_ia ALTER COLUMN id SET DEFAULT nextval('public.resultados_ia_id_seq'::regclass);
 
 
 --
--- TOC entry 4817 (class 2604 OID 59319)
--- Name: signos_vitales id; Type: DEFAULT; Schema: public; Owner: triaje_user
+-- Name: signos_vitales id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.signos_vitales ALTER COLUMN id SET DEFAULT nextval('public.signos_vitales_id_seq'::regclass);
 
 
 --
--- TOC entry 4822 (class 2604 OID 59347)
--- Name: sintomas_triaje id; Type: DEFAULT; Schema: public; Owner: triaje_user
+-- Name: sintomas_triaje id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.sintomas_triaje ALTER COLUMN id SET DEFAULT nextval('public.sintomas_triaje_id_seq'::regclass);
 
 
 --
--- TOC entry 4808 (class 2604 OID 59281)
--- Name: triajes id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: triajes id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.triajes ALTER COLUMN id SET DEFAULT nextval('public.triajes_id_seq'::regclass);
 
 
 --
--- TOC entry 4793 (class 2604 OID 59228)
--- Name: usuarios id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: usuarios id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.usuarios ALTER COLUMN id SET DEFAULT nextval('public.usuarios_id_seq'::regclass);
 
 
 --
--- TOC entry 5066 (class 0 OID 59260)
--- Dependencies: 221
--- Data for Name: contactos_emergencia; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: contactos_emergencia; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.contactos_emergencia (id, paciente_id, nombres_completos, telefono, parentesco, created_at, updated_at, activo, version) FROM stdin;
@@ -661,9 +561,7 @@ COPY public.contactos_emergencia (id, paciente_id, nombres_completos, telefono, 
 
 
 --
--- TOC entry 5076 (class 0 OID 59387)
--- Dependencies: 231
--- Data for Name: hce_antecedentes; Type: TABLE DATA; Schema: public; Owner: triaje_user
+-- Data for Name: hce_antecedentes; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.hce_antecedentes (id, paciente_id, tipo, nombre, descripcion, fecha_diagnostico, activo, created_at, updated_at, version) FROM stdin;
@@ -688,9 +586,7 @@ COPY public.hce_antecedentes (id, paciente_id, tipo, nombre, descripcion, fecha_
 
 
 --
--- TOC entry 5078 (class 0 OID 59409)
--- Dependencies: 233
--- Data for Name: hce_consulta_previa; Type: TABLE DATA; Schema: public; Owner: triaje_user
+-- Data for Name: hce_consulta_previa; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.hce_consulta_previa (id, paciente_id, fecha_consulta, motivo, diagnostico_medico, tratamiento, created_at, updated_at, version, activo) FROM stdin;
@@ -708,9 +604,7 @@ COPY public.hce_consulta_previa (id, paciente_id, fecha_consulta, motivo, diagno
 
 
 --
--- TOC entry 5080 (class 0 OID 59429)
--- Dependencies: 235
--- Data for Name: logs_auditoria; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: logs_auditoria; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.logs_auditoria (id, usuario_id, accion, modulo, registro_id, datos_anteriores, datos_nuevos, ip_address, user_agent, "timestamp") FROM stdin;
@@ -755,9 +649,7 @@ COPY public.logs_auditoria (id, usuario_id, accion, modulo, registro_id, datos_a
 
 
 --
--- TOC entry 5064 (class 0 OID 59243)
--- Dependencies: 219
--- Data for Name: pacientes; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: pacientes; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.pacientes (id, dni, nombres, apellidos, fecha_nacimiento, genero, telefono, email, direccion, activo, created_at, updated_at, version) FROM stdin;
@@ -819,9 +711,7 @@ COPY public.pacientes (id, dni, nombres, apellidos, fecha_nacimiento, genero, te
 
 
 --
--- TOC entry 5074 (class 0 OID 59365)
--- Dependencies: 229
--- Data for Name: resultados_ia; Type: TABLE DATA; Schema: public; Owner: triaje_user
+-- Data for Name: resultados_ia; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.resultados_ia (id, triaje_id, prompt_enviado, respuesta_raw_llm, diagnosticos_json, recomendaciones_json, modelo_utilizado, latencia_segundos, created_at, updated_at, activo, version) FROM stdin;
@@ -843,9 +733,7 @@ COPY public.resultados_ia (id, triaje_id, prompt_enviado, respuesta_raw_llm, dia
 
 
 --
--- TOC entry 5070 (class 0 OID 59316)
--- Dependencies: 225
--- Data for Name: signos_vitales; Type: TABLE DATA; Schema: public; Owner: triaje_user
+-- Data for Name: signos_vitales; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.signos_vitales (id, triaje_id, presion_sistolica, presion_diastolica, frecuencia_cardiaca, frecuencia_respiratoria, temperatura, saturacion_o2, nota_suplementaria, created_at, updated_at, activo, version) FROM stdin;
@@ -899,9 +787,7 @@ COPY public.signos_vitales (id, triaje_id, presion_sistolica, presion_diastolica
 
 
 --
--- TOC entry 5072 (class 0 OID 59344)
--- Dependencies: 227
--- Data for Name: sintomas_triaje; Type: TABLE DATA; Schema: public; Owner: triaje_user
+-- Data for Name: sintomas_triaje; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.sintomas_triaje (id, triaje_id, sintoma, intensidad, descripcion_libre, created_at, updated_at, activo, version) FROM stdin;
@@ -958,9 +844,7 @@ COPY public.sintomas_triaje (id, triaje_id, sintoma, intensidad, descripcion_lib
 
 
 --
--- TOC entry 5068 (class 0 OID 59278)
--- Dependencies: 223
--- Data for Name: triajes; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: triajes; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.triajes (id, paciente_id, usuario_id, fecha_hora, motivo_consulta, nivel_urgencia_asignado_ia, nivel_urgencia_final, estado_logistico, notas_medicas, diagnostico_final_medico, tiempo_atencion_segundos, activo, created_at, updated_at, version, sincronizado_hce, fecha_sincronizacion_hce, hce_sync, hce_sync_at) FROM stdin;
@@ -1014,9 +898,7 @@ COPY public.triajes (id, paciente_id, usuario_id, fecha_hora, motivo_consulta, n
 
 
 --
--- TOC entry 5062 (class 0 OID 59225)
--- Dependencies: 217
--- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.usuarios (id, username, email, hashed_password, nombres, apellidos, rol, activo, last_login, created_at, updated_at, version) FROM stdin;
@@ -1036,98 +918,77 @@ COPY public.usuarios (id, username, email, hashed_password, nombres, apellidos, 
 
 
 --
--- TOC entry 5107 (class 0 OID 0)
--- Dependencies: 220
--- Name: contactos_emergencia_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: contactos_emergencia_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.contactos_emergencia_id_seq', 20, true);
 
 
 --
--- TOC entry 5108 (class 0 OID 0)
--- Dependencies: 230
--- Name: hce_antecedentes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: triaje_user
+-- Name: hce_antecedentes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.hce_antecedentes_id_seq', 17, true);
 
 
 --
--- TOC entry 5109 (class 0 OID 0)
--- Dependencies: 232
--- Name: hce_consulta_previa_id_seq; Type: SEQUENCE SET; Schema: public; Owner: triaje_user
+-- Name: hce_consulta_previa_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.hce_consulta_previa_id_seq', 10, true);
 
 
 --
--- TOC entry 5110 (class 0 OID 0)
--- Dependencies: 234
--- Name: logs_auditoria_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: logs_auditoria_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.logs_auditoria_id_seq', 37, true);
 
 
 --
--- TOC entry 5111 (class 0 OID 0)
--- Dependencies: 218
--- Name: pacientes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: pacientes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.pacientes_id_seq', 54, true);
 
 
 --
--- TOC entry 5112 (class 0 OID 0)
--- Dependencies: 228
--- Name: resultados_ia_id_seq; Type: SEQUENCE SET; Schema: public; Owner: triaje_user
+-- Name: resultados_ia_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.resultados_ia_id_seq', 14, true);
 
 
 --
--- TOC entry 5113 (class 0 OID 0)
--- Dependencies: 224
--- Name: signos_vitales_id_seq; Type: SEQUENCE SET; Schema: public; Owner: triaje_user
+-- Name: signos_vitales_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.signos_vitales_id_seq', 46, true);
 
 
 --
--- TOC entry 5114 (class 0 OID 0)
--- Dependencies: 226
--- Name: sintomas_triaje_id_seq; Type: SEQUENCE SET; Schema: public; Owner: triaje_user
+-- Name: sintomas_triaje_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.sintomas_triaje_id_seq', 49, true);
 
 
 --
--- TOC entry 5115 (class 0 OID 0)
--- Dependencies: 222
--- Name: triajes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: triajes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.triajes_id_seq', 46, true);
 
 
 --
--- TOC entry 5116 (class 0 OID 0)
--- Dependencies: 216
--- Name: usuarios_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: usuarios_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.usuarios_id_seq', 12, true);
 
 
 --
--- TOC entry 4872 (class 2606 OID 59266)
--- Name: contactos_emergencia contactos_emergencia_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: contactos_emergencia contactos_emergencia_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.contactos_emergencia
@@ -1135,8 +996,7 @@ ALTER TABLE ONLY public.contactos_emergencia
 
 
 --
--- TOC entry 4891 (class 2606 OID 59397)
--- Name: hce_antecedentes hce_antecedentes_pkey; Type: CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: hce_antecedentes hce_antecedentes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.hce_antecedentes
@@ -1144,8 +1004,7 @@ ALTER TABLE ONLY public.hce_antecedentes
 
 
 --
--- TOC entry 4893 (class 2606 OID 59417)
--- Name: hce_consulta_previa hce_consulta_previa_pkey; Type: CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: hce_consulta_previa hce_consulta_previa_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.hce_consulta_previa
@@ -1153,8 +1012,7 @@ ALTER TABLE ONLY public.hce_consulta_previa
 
 
 --
--- TOC entry 4897 (class 2606 OID 59438)
--- Name: logs_auditoria logs_auditoria_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: logs_auditoria logs_auditoria_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.logs_auditoria
@@ -1162,8 +1020,7 @@ ALTER TABLE ONLY public.logs_auditoria
 
 
 --
--- TOC entry 4868 (class 2606 OID 59258)
--- Name: pacientes pacientes_dni_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: pacientes pacientes_dni_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.pacientes
@@ -1171,8 +1028,7 @@ ALTER TABLE ONLY public.pacientes
 
 
 --
--- TOC entry 4870 (class 2606 OID 59256)
--- Name: pacientes pacientes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: pacientes pacientes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.pacientes
@@ -1180,8 +1036,7 @@ ALTER TABLE ONLY public.pacientes
 
 
 --
--- TOC entry 4887 (class 2606 OID 59373)
--- Name: resultados_ia resultados_ia_pkey; Type: CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: resultados_ia resultados_ia_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.resultados_ia
@@ -1189,8 +1044,7 @@ ALTER TABLE ONLY public.resultados_ia
 
 
 --
--- TOC entry 4889 (class 2606 OID 59375)
--- Name: resultados_ia resultados_ia_triaje_id_key; Type: CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: resultados_ia resultados_ia_triaje_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.resultados_ia
@@ -1198,8 +1052,7 @@ ALTER TABLE ONLY public.resultados_ia
 
 
 --
--- TOC entry 4880 (class 2606 OID 59330)
--- Name: signos_vitales signos_vitales_pkey; Type: CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: signos_vitales signos_vitales_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.signos_vitales
@@ -1207,8 +1060,7 @@ ALTER TABLE ONLY public.signos_vitales
 
 
 --
--- TOC entry 4882 (class 2606 OID 59332)
--- Name: signos_vitales signos_vitales_triaje_id_key; Type: CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: signos_vitales signos_vitales_triaje_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.signos_vitales
@@ -1216,8 +1068,7 @@ ALTER TABLE ONLY public.signos_vitales
 
 
 --
--- TOC entry 4885 (class 2606 OID 59353)
--- Name: sintomas_triaje sintomas_triaje_pkey; Type: CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: sintomas_triaje sintomas_triaje_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.sintomas_triaje
@@ -1225,8 +1076,7 @@ ALTER TABLE ONLY public.sintomas_triaje
 
 
 --
--- TOC entry 4878 (class 2606 OID 59294)
--- Name: triajes triajes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: triajes triajes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.triajes
@@ -1234,8 +1084,7 @@ ALTER TABLE ONLY public.triajes
 
 
 --
--- TOC entry 4860 (class 2606 OID 59241)
--- Name: usuarios usuarios_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: usuarios usuarios_email_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.usuarios
@@ -1243,8 +1092,7 @@ ALTER TABLE ONLY public.usuarios
 
 
 --
--- TOC entry 4862 (class 2606 OID 59237)
--- Name: usuarios usuarios_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: usuarios usuarios_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.usuarios
@@ -1252,8 +1100,7 @@ ALTER TABLE ONLY public.usuarios
 
 
 --
--- TOC entry 4864 (class 2606 OID 59239)
--- Name: usuarios usuarios_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: usuarios usuarios_username_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.usuarios
@@ -1261,104 +1108,91 @@ ALTER TABLE ONLY public.usuarios
 
 
 --
--- TOC entry 4894 (class 1259 OID 59450)
--- Name: idx_logs_auditoria_modulo; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_logs_auditoria_modulo; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_logs_auditoria_modulo ON public.logs_auditoria USING btree (modulo, registro_id);
 
 
 --
--- TOC entry 4895 (class 1259 OID 59449)
--- Name: idx_logs_auditoria_timestamp; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_logs_auditoria_timestamp; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_logs_auditoria_timestamp ON public.logs_auditoria USING btree ("timestamp" DESC);
 
 
 --
--- TOC entry 4865 (class 1259 OID 59447)
--- Name: idx_pacientes_dni; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_pacientes_dni; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_pacientes_dni ON public.pacientes USING btree (dni) WHERE (activo = true);
 
 
 --
--- TOC entry 4866 (class 1259 OID 59448)
--- Name: idx_pacientes_nombres; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_pacientes_nombres; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_pacientes_nombres ON public.pacientes USING btree (nombres, apellidos);
 
 
 --
--- TOC entry 4883 (class 1259 OID 59452)
--- Name: idx_sintomas_triaje_sintoma; Type: INDEX; Schema: public; Owner: triaje_user
+-- Name: idx_sintomas_triaje_sintoma; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_sintomas_triaje_sintoma ON public.sintomas_triaje USING btree (sintoma);
 
 
 --
--- TOC entry 4873 (class 1259 OID 59444)
--- Name: idx_triajes_estado_logistico; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_triajes_estado_logistico; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_triajes_estado_logistico ON public.triajes USING btree (estado_logistico) WHERE (activo = true);
 
 
 --
--- TOC entry 4874 (class 1259 OID 59446)
--- Name: idx_triajes_fecha_hora; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_triajes_fecha_hora; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_triajes_fecha_hora ON public.triajes USING btree (fecha_hora DESC);
 
 
 --
--- TOC entry 4875 (class 1259 OID 59451)
--- Name: idx_triajes_fecha_nivel; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_triajes_fecha_nivel; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_triajes_fecha_nivel ON public.triajes USING btree (fecha_hora, nivel_urgencia_final);
 
 
 --
--- TOC entry 4876 (class 1259 OID 59445)
--- Name: idx_triajes_nivel_urgencia_final; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_triajes_nivel_urgencia_final; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_triajes_nivel_urgencia_final ON public.triajes USING btree (nivel_urgencia_final);
 
 
 --
--- TOC entry 4916 (class 2620 OID 59455)
--- Name: pacientes update_pacientes_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: pacientes update_pacientes_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER update_pacientes_updated_at BEFORE UPDATE ON public.pacientes FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 
 --
--- TOC entry 4917 (class 2620 OID 59456)
--- Name: triajes update_triajes_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: triajes update_triajes_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER update_triajes_updated_at BEFORE UPDATE ON public.triajes FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 
 --
--- TOC entry 4915 (class 2620 OID 59454)
--- Name: usuarios update_usuarios_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: usuarios update_usuarios_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER update_usuarios_updated_at BEFORE UPDATE ON public.usuarios FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 
 --
--- TOC entry 4898 (class 2606 OID 59267)
--- Name: contactos_emergencia contactos_emergencia_paciente_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: contactos_emergencia contactos_emergencia_paciente_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.contactos_emergencia
@@ -1366,8 +1200,7 @@ ALTER TABLE ONLY public.contactos_emergencia
 
 
 --
--- TOC entry 4910 (class 2606 OID 59403)
--- Name: hce_antecedentes fk_antecedente_paciente; Type: FK CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: hce_antecedentes fk_antecedente_paciente; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.hce_antecedentes
@@ -1375,8 +1208,7 @@ ALTER TABLE ONLY public.hce_antecedentes
 
 
 --
--- TOC entry 4912 (class 2606 OID 59423)
--- Name: hce_consulta_previa fk_consulta_paciente; Type: FK CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: hce_consulta_previa fk_consulta_paciente; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.hce_consulta_previa
@@ -1384,8 +1216,7 @@ ALTER TABLE ONLY public.hce_consulta_previa
 
 
 --
--- TOC entry 4899 (class 2606 OID 59272)
--- Name: contactos_emergencia fk_contacto_paciente; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: contactos_emergencia fk_contacto_paciente; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.contactos_emergencia
@@ -1393,8 +1224,7 @@ ALTER TABLE ONLY public.contactos_emergencia
 
 
 --
--- TOC entry 4908 (class 2606 OID 59381)
--- Name: resultados_ia fk_resultados_ia_triaje; Type: FK CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: resultados_ia fk_resultados_ia_triaje; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.resultados_ia
@@ -1402,8 +1232,7 @@ ALTER TABLE ONLY public.resultados_ia
 
 
 --
--- TOC entry 4904 (class 2606 OID 59338)
--- Name: signos_vitales fk_signos_triaje; Type: FK CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: signos_vitales fk_signos_triaje; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.signos_vitales
@@ -1411,8 +1240,7 @@ ALTER TABLE ONLY public.signos_vitales
 
 
 --
--- TOC entry 4906 (class 2606 OID 59359)
--- Name: sintomas_triaje fk_sintomas_triaje; Type: FK CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: sintomas_triaje fk_sintomas_triaje; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.sintomas_triaje
@@ -1420,8 +1248,7 @@ ALTER TABLE ONLY public.sintomas_triaje
 
 
 --
--- TOC entry 4900 (class 2606 OID 59305)
--- Name: triajes fk_triaje_paciente; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: triajes fk_triaje_paciente; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.triajes
@@ -1429,8 +1256,7 @@ ALTER TABLE ONLY public.triajes
 
 
 --
--- TOC entry 4901 (class 2606 OID 59310)
--- Name: triajes fk_triaje_usuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: triajes fk_triaje_usuario; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.triajes
@@ -1438,8 +1264,7 @@ ALTER TABLE ONLY public.triajes
 
 
 --
--- TOC entry 4911 (class 2606 OID 59398)
--- Name: hce_antecedentes hce_antecedentes_paciente_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: hce_antecedentes hce_antecedentes_paciente_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.hce_antecedentes
@@ -1447,8 +1272,7 @@ ALTER TABLE ONLY public.hce_antecedentes
 
 
 --
--- TOC entry 4913 (class 2606 OID 59418)
--- Name: hce_consulta_previa hce_consulta_previa_paciente_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: hce_consulta_previa hce_consulta_previa_paciente_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.hce_consulta_previa
@@ -1456,8 +1280,7 @@ ALTER TABLE ONLY public.hce_consulta_previa
 
 
 --
--- TOC entry 4914 (class 2606 OID 59439)
--- Name: logs_auditoria logs_auditoria_usuario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: logs_auditoria logs_auditoria_usuario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.logs_auditoria
@@ -1465,8 +1288,7 @@ ALTER TABLE ONLY public.logs_auditoria
 
 
 --
--- TOC entry 4909 (class 2606 OID 59376)
--- Name: resultados_ia resultados_ia_triaje_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: resultados_ia resultados_ia_triaje_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.resultados_ia
@@ -1474,8 +1296,7 @@ ALTER TABLE ONLY public.resultados_ia
 
 
 --
--- TOC entry 4905 (class 2606 OID 59333)
--- Name: signos_vitales signos_vitales_triaje_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: signos_vitales signos_vitales_triaje_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.signos_vitales
@@ -1483,8 +1304,7 @@ ALTER TABLE ONLY public.signos_vitales
 
 
 --
--- TOC entry 4907 (class 2606 OID 59354)
--- Name: sintomas_triaje sintomas_triaje_triaje_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: triaje_user
+-- Name: sintomas_triaje sintomas_triaje_triaje_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.sintomas_triaje
@@ -1492,8 +1312,7 @@ ALTER TABLE ONLY public.sintomas_triaje
 
 
 --
--- TOC entry 4902 (class 2606 OID 59295)
--- Name: triajes triajes_paciente_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: triajes triajes_paciente_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.triajes
@@ -1501,8 +1320,7 @@ ALTER TABLE ONLY public.triajes
 
 
 --
--- TOC entry 4903 (class 2606 OID 59300)
--- Name: triajes triajes_usuario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: triajes triajes_usuario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.triajes
@@ -1510,108 +1328,8 @@ ALTER TABLE ONLY public.triajes
 
 
 --
--- TOC entry 5087 (class 0 OID 0)
--- Dependencies: 221
--- Name: TABLE contactos_emergencia; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON TABLE public.contactos_emergencia TO triaje_user;
-
-
---
--- TOC entry 5089 (class 0 OID 0)
--- Dependencies: 220
--- Name: SEQUENCE contactos_emergencia_id_seq; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON SEQUENCE public.contactos_emergencia_id_seq TO triaje_user;
-
-
---
--- TOC entry 5092 (class 0 OID 0)
--- Dependencies: 235
--- Name: TABLE logs_auditoria; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON TABLE public.logs_auditoria TO triaje_user;
-
-
---
--- TOC entry 5094 (class 0 OID 0)
--- Dependencies: 234
--- Name: SEQUENCE logs_auditoria_id_seq; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON SEQUENCE public.logs_auditoria_id_seq TO triaje_user;
-
-
---
--- TOC entry 5095 (class 0 OID 0)
--- Dependencies: 219
--- Name: TABLE pacientes; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON TABLE public.pacientes TO triaje_user;
-
-
---
--- TOC entry 5097 (class 0 OID 0)
--- Dependencies: 218
--- Name: SEQUENCE pacientes_id_seq; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON SEQUENCE public.pacientes_id_seq TO triaje_user;
-
-
---
--- TOC entry 5101 (class 0 OID 0)
--- Dependencies: 223
--- Name: TABLE triajes; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON TABLE public.triajes TO triaje_user;
-
-
---
--- TOC entry 5103 (class 0 OID 0)
--- Dependencies: 222
--- Name: SEQUENCE triajes_id_seq; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON SEQUENCE public.triajes_id_seq TO triaje_user;
-
-
---
--- TOC entry 5104 (class 0 OID 0)
--- Dependencies: 217
--- Name: TABLE usuarios; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON TABLE public.usuarios TO triaje_user;
-
-
---
--- TOC entry 5106 (class 0 OID 0)
--- Dependencies: 216
--- Name: SEQUENCE usuarios_id_seq; Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON SEQUENCE public.usuarios_id_seq TO triaje_user;
-
-
---
--- TOC entry 2095 (class 826 OID 59458)
--- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: postgres
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON TABLES TO triaje_user;
-
-
--- Completed on 2026-05-09 17:10:05
-
---
 -- PostgreSQL database dump complete
 --
 
-\unrestrict iTP79f67o3Or4rFVpkrxBNqg9cDkEa2WBEzpA7PWlVEHGRRmJvfPeCSAvLPBDB3
+\unrestrict dGoSDuDhf3R7Dhk9r3scXo9RoNWPl5UpjwiRcIpUzbiiavU8AYZrhsoYm5TIFcJ
 
