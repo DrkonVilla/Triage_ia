@@ -57,7 +57,7 @@
       "position": [650, 300],
       "parameters": {
         "method": "GET",
-        "url": "http://fastapi:8000/api/v1/reportes/shift-pdf",
+        "url": "https://triage-fastapi-production-b972.up.railway.app/api/v1/reportes/shift-pdf",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -83,7 +83,7 @@
       "typeVersion": 2,
       "position": [850, 300],
       "parameters": {
-        "jsCode": "const stats = $('Estadísticas del día').all()[0].json;\nconst niveles = $('Por nivel urgencia').all().map(i => i.json);\nconst hoy = new Date().toLocaleDateString('es-CL');\n\nconst total = stats.total_triajes || 0;\nconst tiempo = stats.tiempo_promedio_min ? Math.round(stats.tiempo_promedio_min * 10) / 10 : 0;\nconst criticos = stats.criticos || 0;\nconst discrepancias = stats.discrepancias || 0;\nconst tasa = total > 0 ? Math.round(((total - discrepancias) / total) * 1000) / 10 : 0;\n\nlet nivelesText = niveles.map(n => `- ${n.nivel_urgencia_final}: ${n.cantidad}`).join('\\n');\n\nconst body = `📊 *Reporte Diario de Triaje - ${hoy}*\\n\\n📅 Fecha: ${hoy}\\n📋 Total Triajes: ${total}\\n⏱️ Tiempo Promedio: ${tiempo} minutos\\n🔴 Pacientes Críticos: ${criticos}\\n🔄 Discrepancias IA: ${discrepancias}\\n📈 Tasa Concurrencia: ${tasa}%\\n\\n📊 Distribución por nivel:\\n${nivelesText}\\n\\n[Reporte PDF adjunto]`;\n\nreturn [{ json: { to: process.env.REPORT_RECIPIENT, subject: `📊 Reporte Diario de Triaje - ${hoy}`, body: body } }];"
+        "jsCode": "const stats = $('Estadísticas del día').all()[0].json;\nconst niveles = $('Por nivel urgencia').all().map(i => i.json);\nconst hoy = new Date().toLocaleDateString('es-CL');\n\nconst total = stats.total_triajes || 0;\nconst tiempo = stats.tiempo_promedio_min ? Math.round(stats.tiempo_promedio_min * 10) / 10 : 0;\nconst criticos = stats.criticos || 0;\nconst discrepancias = stats.discrepancias || 0;\nconst tasa = total > 0 ? Math.round(((total - discrepancias) / total) * 1000) / 10 : 0;\n\nlet nivelesText = niveles.map(n => `- ${n.nivel_urgencia_final}: ${n.cantidad}`).join('\\n');\n\nconst body = `📊 *Reporte Diario de Triaje - ${hoy}*\\n\\n📅 Fecha: ${hoy}\\n📋 Total Triajes: ${total}\\n⏱️ Tiempo Promedio: ${tiempo} minutos\\n🔴 Pacientes Críticos: ${criticos}\\n🔄 Discrepancias IA: ${discrepancias}\\n📈 Tasa Concurrencia: ${tasa}%\\n\\n📊 Distribución por nivel:\\n${nivelesText}\\n\\n[Reporte PDF adjunto]`;\n\nreturn [{ json: { to: 'villafavian87@gmail.com', subject: `📊 Reporte Diario de Triaje - ${hoy}`, body: body } }];"
       }
     },
     {
@@ -93,7 +93,7 @@
       "typeVersion": 1,
       "position": [1050, 300],
       "parameters": {
-        "fromEmail": "={{ $env.SMTP_USER }}",
+        "fromEmail": "triage-sistema@hospital.com",
         "toEmail": "={{ $json.to }}",
         "subject": "={{ $json.subject }}",
         "emailFormat": "text",
