@@ -7,6 +7,8 @@ from dateutil.relativedelta import relativedelta
 from typing import List, Dict, Any
 from fpdf import FPDF
 import io
+import httpx
+from app.config import settings
 
 from app.database import get_db
 from app.dependencies import GerenteDep, AuditorDep, CurrentUser
@@ -16,6 +18,34 @@ from app.models.sintoma_triaje import SintomaTriaje
 from sqlalchemy import and_, extract
 
 router = APIRouter(prefix="/api/v1/reportes", tags=["Reportes"])
+
+async def notificar_reporte_generado(tipo_reporte: str, params: Dict[str, Any] = None):
+    """Notifica a n8n que se generó un reporte para enviar email"""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            payload = {
+                "origen": "fastapi",
+                "tipo_reporte": tipo_reporte,
+                "timestamp": datetime.now().isoformat(),
+                "params": params or {}
+            }
+            
+            # URL del webhook de n8n (ajustar según tu deploy)
+            webhook_url = "https://n8n-production-d937.up.railway.app/webhook/generar-reporte"
+            
+            response = await client.post(webhook_url, json=payload)
+            response.raise_for_status()
+            
+            # Log de notificación exitosa (opcional)
+            print(f"✅ Notificación enviada a n8n: {tipo_reporte}")
+            
+    except httpx.HTTPStatusError as e:
+        print(f"⚠️ Error HTTP notificando a n8n: {e}")
+    except httpx.TimeoutException:
+        print(f"⚠️ Timeout notificando a n8n")
+    except Exception as e:
+        print(f"⚠️ Error notificando a n8n: {e}")
+    # No lanzar excepción para no bloquear la generación del reporte
 
 class PDFReport(FPDF):
     def header(self):
@@ -180,6 +210,9 @@ async def generate_shift_report(
     output.seek(0)
     
     filename = f"reporte_turno_{rango}_{hoy.strftime('%Y%m%d')}.pdf"
+    
+    # Notificar a n8n para enviar email
+    await notificar_reporte_generado("shift-pdf", {"rango": rango, "filename": filename})
     
     return StreamingResponse(
         output,
@@ -476,6 +509,9 @@ async def generate_monthly_report_pdf(
     output.seek(0)
     
     filename = f"reporte_mensual_{mes:02d}_{anio}.pdf"
+    
+    # Notificar a n8n para enviar email
+    await notificar_reporte_generado("monthly-pdf", {"mes": mes, "anio": anio, "filename": filename})
     
     return StreamingResponse(
         output,
