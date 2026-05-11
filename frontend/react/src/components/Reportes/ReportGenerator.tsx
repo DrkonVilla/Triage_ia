@@ -13,7 +13,11 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({ month, onGener
   const handleGenerate = async () => {
     setGenerating(true);
     try {
-      const pdfBlob = await dashboardService.generateMonthlyReport(month);
+      // Extraer mes y año del string "YYYY-MM"
+      const [yearStr, monthStr] = month.split('-');
+      const mes = parseInt(monthStr, 10);
+      const anio = parseInt(yearStr, 10);
+      const pdfBlob = await dashboardService.generateMonthlyReport(mes, anio);
       const url = window.URL.createObjectURL(pdfBlob);
       const a = document.createElement('a');
       a.href = url;
