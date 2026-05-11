@@ -50,8 +50,9 @@ export interface Discrepancia {
   paciente: string;
   nivel_ia: string;
   nivel_humano: string;
-  diferencia: string;
-  motivo?: string;
+  diferencia: string | number;
+  tipo: string;
+  motivo_consulta?: string;
 }
 
 export interface AuditLog {

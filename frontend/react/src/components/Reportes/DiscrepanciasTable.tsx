@@ -4,17 +4,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-
-interface Discrepancia {
-  id: number;
-  fecha: string;
-  paciente: string;
-  nivel_ia: string;
-  nivel_humano: string;
-  diferencia: string | number;
-  tipo: string;
-  motivo_consulta?: string;
-}
+import type { Discrepancia } from '../../types';
 
 const columnHelper = createColumnHelper<Discrepancia>();
 
