@@ -30,7 +30,7 @@ app = FastAPI(
 # Obtener orígenes permitidos desde variable de entorno o usar lista por defecto
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
-    "https://triage-streamlit-production.up.railway.app,http://localhost:8501,http://localhost:5173,http://localhost:8000"
+    "https://triage-streamlit-production.up.railway.app,https://triageiaxd.vercel.app,http://localhost:8501,http://localhost:5173,http://localhost:8000"
 ).split(",")
 
 app.add_middleware(

@@ -13,7 +13,7 @@ from components.auth_persistence import verify_and_restore_session
 st.set_page_config(page_title="Cola de Atención Médica", page_icon="🩺", layout="wide")
 
 # Intentar restaurar sesión si no está autenticado
-API_BASE_URL = "http://localhost:8000"
+# API_BASE_URL se importa desde utils.py (usa variable de entorno)
 if not st.session_state.get('authenticated'):
     if verify_and_restore_session(API_BASE_URL):
         st.rerun()
@@ -43,7 +43,7 @@ if auto_refresh:
 def load_cola():
     headers = get_auth_headers()
     try:
-        response = requests.get("http://localhost:8000/api/v1/cola-medica/", headers=headers)
+        response = requests.get(f"{API_BASE_URL}/cola-medica/", headers=headers)
         if response.status_code == 200:
             return response.json()
         else:
@@ -426,7 +426,7 @@ if st.session_state.get('triaje_en_edicion'):
                     headers = get_auth_headers()
                     try:
                         response = requests.put(
-                            f"http://localhost:8000/api/v1/cola-medica/{triaje_id}/notas-medicas",
+                            f"{API_BASE_URL}/cola-medica/{triaje_id}/notas-medicas",
                             params={"notas": nuevas_notas, "diagnostico_final": diagnostico_final},
                             headers=headers
                         )
@@ -448,7 +448,7 @@ if st.session_state.get('triaje_en_edicion'):
                             try:
                                 # PASO 1: Guardar diagnóstico (esto incrementa la versión en el backend)
                                 response = requests.put(
-                                    f"http://localhost:8000/api/v1/cola-medica/{triaje_id}/notas-medicas",
+                                    f"{API_BASE_URL}/cola-medica/{triaje_id}/notas-medicas",
                                     params={"notas": nuevas_notas, "diagnostico_final": diagnostico_final},
                                     headers=headers
                                 )
@@ -457,7 +457,7 @@ if st.session_state.get('triaje_en_edicion'):
                                     # PASO 2: Recargar paciente para obtener la NUEVA versión 
                                     # (guardar notas incrementó la versión)
                                     refresh_resp = requests.get(
-                                        f"http://localhost:8000/api/v1/triaje/{triaje_id}",
+                                        f"{API_BASE_URL}/triaje/{triaje_id}",
                                         headers=headers,
                                         timeout=10
                                     )
