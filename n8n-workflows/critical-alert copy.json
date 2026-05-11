@@ -1,4 +1,4 @@
-{
+[{
   "name": "Alerta Crítica Telegram",
   "active": false,
   "nodes": [
@@ -13,14 +13,16 @@
         "httpMethod": "POST",
         "path": "critical-alert",
         "responseMode": "responseNode",
-        "options": {}
+        "responseData": {
+          "allEntries": {}
+        }
       }
     },
     {
       "id": "filter-urgency",
-      "name": "Es RED u ORANGE",
+      "name": "¿Es RED u ORANGE?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
+      "typeVersion": 1,
       "position": [450, 300],
       "parameters": {
         "conditions": {
@@ -32,7 +34,7 @@
           "conditions": [
             {
               "id": "cond-1",
-              "leftValue": "={{ $json.nivel_urgencia_final }}",
+              "leftValue": "={{ $json.nivel_urgencia_final || $json.nivelUrgenciaFinal }}",
               "rightValue": "RED",
               "operator": {
                 "type": "string",
@@ -41,7 +43,7 @@
             },
             {
               "id": "cond-2",
-              "leftValue": "={{ $json.nivel_urgencia_final }}",
+              "leftValue": "={{ $json.nivel_urgencia_final || $json.nivelUrgenciaFinal }}",
               "rightValue": "ORANGE",
               "operator": {
                 "type": "string",
@@ -55,7 +57,7 @@
     },
     {
       "id": "fetch-medicos",
-      "name": "Obtener Medicos",
+      "name": "Obtener Médicos",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2,
       "position": [650, 200],
@@ -74,7 +76,7 @@
       "typeVersion": 2,
       "position": [850, 200],
       "parameters": {
-        "jsCode": "// Obtener datos del paciente (viene del webhook)\nconst paciente = $input.first().json;\n\n// Obtener la lista de médicos (viene del nodo Obtener Medicos)\nconst medicosInput = $('Obtener Medicos').first().json;\n\nconst nombre = paciente.paciente_nombre_completo || paciente.pacienteNombreCompleto || 'Paciente';\nconst nivel = paciente.nivel_urgencia_final || paciente.nivelUrgenciaFinal;\nconst motivo = paciente.motivo_consulta || paciente.motivoConsulta || 'N/A';\nconst id = paciente.id || paciente.Id || 'N/A';\nconst timestamp = new Date().toLocaleString('es-CL', { timeZone: 'America/Santiago' });\n\nlet medList = '';\nif (Array.isArray(medicosInput)) {\n  medList = medicosInput.map(m => `- Dr. ${m.nombres} ${m.apellidos}`).join('\\n');\n  if (medList === '') medList = 'No hay médicos disponibles';\n} else if (medicosInput && medicosInput.nombres) {\n  medList = `- Dr. ${medicosInput.nombres} ${medicosInput.apellidos}`;\n} else {\n  medList = 'No hay médicos disponibles';\n}\n\nconst mensaje = `🚨 *ALERTA DE TRIAJE* 🚨\\n\\n🏥 *Paciente:* ${nombre}\\n⚠️ *Nivel:* ${nivel === 'RED' ? '🔴 CRÍTICO' : nivel === 'ORANGE' ? '🟠 URGENTE' : '⚪ ' + nivel}\\n📝 *Motivo:* ${motivo}\\n🆔 *ID Triaje:* ${id}\\n\\n📋 *Médicos disponibles:*\\n${medList}\\n\\n⏰ *Timestamp:* ${timestamp}\\n📍 *Unidad:* Emergencia`;\n\n// CAMBIA ESTO POR TU CHAT ID REAL\nconst chatId = '-1001234567890'; // ← Reemplaza con tu chat ID\n\nreturn [{ json: { chat_id: chatId, text: mensaje, parse_mode: 'Markdown' } }];"
+        "jsCode": "const paciente = $input.first().json;\nconst medicos = $('Obtener Médicos').all()[0].json;\n\nconst nombre = paciente.paciente_nombre_completo || paciente.pacienteNombreCompleto || 'Paciente';\nconst nivel = paciente.nivel_urgencia_final || paciente.nivelUrgenciaFinal;\nconst motivo = paciente.motivo_consulta || paciente.motivoConsulta || 'N/A';\nconst id = paciente.id || paciente.Id;\nconst timestamp = new Date().toLocaleString('es-CL');\n\nlet medList = medicos.map(m => `- Dr. ${m.nombres} ${m.apellidos}`).join('\\n');\n\nconst mensaje = `🚨 *ALERTA DE TRIAJE* 🚨\n\n🏥 *Paciente:* ${nombre}\n⚠️ *Nivel:* ${nivel === 'RED' ? '🔴 CRÍTICO' : '🟠 URGENTE'}\n📝 *Motivo:* ${motivo}\n🆔 *ID Triaje:* ${id}\n\n📋 *Médicos disponibles:*\n${medList}\n\n⏰ *Timestamp:* ${timestamp}\n📍 *Unidad:* Emergencia`;\n\nreturn [{ json: { chat_id: process.env.TELEGRAM_CHAT_ID, text: mensaje, parse_mode: 'Markdown' } }];"
       }
     },
     {
@@ -86,7 +88,9 @@
       "parameters": {
         "chatId": "={{ $json.chat_id }}",
         "text": "={{ $json.text }}",
-        "additionalFields": {}
+        "additionalOptions": {
+          "parse_mode": "Markdown"
+        }
       },
       "credentials": {
         "telegramApi": "triage-bot"
@@ -94,7 +98,7 @@
     },
     {
       "id": "log-skip",
-      "name": "Log: No critico",
+      "name": "Log: No crítico",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [650, 400]
@@ -106,6 +110,7 @@
       "typeVersion": 1,
       "position": [1250, 200],
       "parameters": {
+        "options": {},
         "respondWith": "json",
         "responseBody": "={{ { status: 'alert_sent', timestamp: new Date().toISOString() } }}"
       }
@@ -116,32 +121,32 @@
       "main": [
         [
           {
-            "node": "Es RED u ORANGE",
+            "node": "¿Es RED u ORANGE?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Es RED u ORANGE": {
+    "¿Es RED u ORANGE?": {
       "main": [
         [
           {
-            "node": "Obtener Medicos",
+            "node": "Obtener Médicos",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Log: No critico",
+            "node": "Log: No crítico",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Obtener Medicos": {
+    "Obtener Médicos": {
       "main": [
         [
           {
@@ -176,8 +181,18 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "errorWorkflow": ""
   },
   "staticData": null,
-  "tags": []
-}
+  "tags": [
+    {
+      "name": "critical",
+      "id": "tag-critical"
+    },
+    {
+      "name": "telegram",
+      "id": "tag-telegram"
+    }
+  ]
+}]

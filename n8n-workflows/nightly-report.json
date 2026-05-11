@@ -1,4 +1,4 @@
-[{
+{
   "name": "Reporte Nocturno Email",
   "active": false,
   "nodes": [
@@ -29,10 +29,14 @@
       "position": [450, 300],
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT COUNT(*) as total_triajes, AVG(EXTRACT(EPOCH FROM (t.updated_at - t.created_at))/60) as tiempo_promedio_min, COUNT(CASE WHEN t.nivel_urgencia_final = 'RED' THEN 1 END) as criticos, COUNT(CASE WHEN t.nivel_urgencia_final != t.nivel_urgencia_asignado_ia THEN 1 END) as discrepancias FROM triajes t WHERE DATE(t.created_at) = CURRENT_DATE;"
+        "query": "SELECT COUNT(*) as total_triajes, AVG(EXTRACT(EPOCH FROM (t.updated_at - t.created_at))/60) as tiempo_promedio_min, COUNT(CASE WHEN t.nivel_urgencia_final = 'RED' THEN 1 END) as criticos, COUNT(CASE WHEN t.nivel_urgencia_final != t.nivel_urgencia_asignado_ia THEN 1 END) as discrepancias FROM triajes t WHERE DATE(t.created_at) = CURRENT_DATE;",
+        "options": {}
       },
       "credentials": {
-        "postgres": "triage-postgres"
+        "postgres": {
+          "id": "9NCs5NWzLa7fXarL",
+          "name": "Postgres account"
+        }
       }
     },
     {
@@ -43,10 +47,14 @@
       "position": [450, 450],
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT nivel_urgencia_final, COUNT(*) as cantidad FROM triajes WHERE DATE(created_at) = CURRENT_DATE GROUP BY nivel_urgencia_final;"
+        "query": "SELECT nivel_urgencia_final, COUNT(*) as cantidad FROM triajes WHERE DATE(created_at) = CURRENT_DATE GROUP BY nivel_urgencia_final;",
+        "options": {}
       },
       "credentials": {
-        "postgres": "triage-postgres"
+        "postgres": {
+          "id": "9NCs5NWzLa7fXarL",
+          "name": "Postgres account"
+        }
       }
     },
     {
@@ -83,25 +91,28 @@
       "typeVersion": 2,
       "position": [850, 300],
       "parameters": {
-        "jsCode": "const stats = $('Estadísticas del día').all()[0].json;\nconst niveles = $('Por nivel urgencia').all().map(i => i.json);\nconst hoy = new Date().toLocaleDateString('es-CL');\n\nconst total = stats.total_triajes || 0;\nconst tiempo = stats.tiempo_promedio_min ? Math.round(stats.tiempo_promedio_min * 10) / 10 : 0;\nconst criticos = stats.criticos || 0;\nconst discrepancias = stats.discrepancias || 0;\nconst tasa = total > 0 ? Math.round(((total - discrepancias) / total) * 1000) / 10 : 0;\n\nlet nivelesText = niveles.map(n => `- ${n.nivel_urgencia_final}: ${n.cantidad}`).join('\\n');\n\nconst body = `📊 *Reporte Diario de Triaje - ${hoy}*\\n\\n📅 Fecha: ${hoy}\\n📋 Total Triajes: ${total}\\n⏱️ Tiempo Promedio: ${tiempo} minutos\\n🔴 Pacientes Críticos: ${criticos}\\n🔄 Discrepancias IA: ${discrepancias}\\n📈 Tasa Concurrencia: ${tasa}%\\n\\n📊 Distribución por nivel:\\n${nivelesText}\\n\\n[Reporte PDF adjunto]`;\n\nreturn [{ json: { to: 'villafavian87@gmail.com', subject: `📊 Reporte Diario de Triaje - ${hoy}`, body: body } }];"
+        "jsCode": "const stats = $('Estadísticas del día').all()[0].json;\nconst niveles = $('Por nivel urgencia').all().map(i => i.json);\nconst hoy = new Date().toLocaleDateString('es-CL');\n\nconst total = stats.total_triajes || 0;\nconst tiempo = stats.tiempo_promedio_min ? Math.round(stats.tiempo_promedio_min * 10) / 10 : 0;\nconst criticos = stats.criticos || 0;\nconst discrepancias = stats.discrepancias || 0;\nconst tasa = total > 0 ? Math.round(((total - discrepancias) / total) * 1000) / 10 : 0;\n\nlet nivelesText = niveles.map(n => `- ${n.nivel_urgencia_final}: ${n.cantidad}`).join('\\n');\nif (!nivelesText) nivelesText = 'Sin triajes registrados hoy';\n\nconst body = `Reporte Diario de Triaje - ${hoy}\\n\\nFecha: ${hoy}\\nTotal Triajes: ${total}\\nTiempo Promedio: ${tiempo} minutos\\nPacientes Críticos: ${criticos}\\nDiscrepancias IA: ${discrepancias}\\nTasa Concordancia IA: ${tasa}%\\n\\nDistribución por nivel:\\n${nivelesText}\\n\\nReporte PDF adjunto.`;\n\nreturn [{ json: { to: 'villafavian87@gmail.com', subject: `Reporte Diario de Triaje - ${hoy}`, body: body } }];"
       }
     },
     {
       "id": "send-email",
       "name": "Enviar Email",
       "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 1,
+      "typeVersion": 2,
       "position": [1050, 300],
       "parameters": {
-        "fromEmail": "triage-sistema@hospital.com",
+        "fromEmail": "villafavian87@gmail.com",
         "toEmail": "={{ $json.to }}",
         "subject": "={{ $json.subject }}",
         "emailFormat": "text",
         "text": "={{ $json.body }}",
-        "attachments": "={{ [{ binary: $('Generar PDF').binary }] }}"
+        "options": {}
       },
       "credentials": {
-        "smtp": "triage-smtp"
+        "smtp": {
+          "id": "xlJyfhEFayjNT6Rb",
+          "name": "SMTP account"
+        }
       }
     }
   ],
@@ -123,6 +134,17 @@
       ]
     },
     "Estadísticas del día": {
+      "main": [
+        [
+          {
+            "node": "Generar PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Por nivel urgencia": {
       "main": [
         [
           {
@@ -157,18 +179,8 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "errorWorkflow": ""
+    "executionOrder": "v1"
   },
   "staticData": null,
-  "tags": [
-    {
-      "name": "report",
-      "id": "tag-report"
-    },
-    {
-      "name": "email",
-      "id": "tag-email"
-    }
-  ]
-}]
+  "tags": []
+}
