@@ -4,11 +4,12 @@ import { es } from 'date-fns/locale';
 import { FileText, Download, AlertCircle } from 'lucide-react';
 import { dashboardService } from '../services/api';
 import { DiscrepanciasTable } from '../components/Reportes/DiscrepanciasTable';
+import type { Discrepancia } from '../types';
 
 export const ReportesMensuales: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [generating, setGenerating] = useState(false);
-  const [discrepancias, setDiscrepancias] = useState([]);
+  const [discrepancias, setDiscrepancias] = useState<Discrepancia[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
