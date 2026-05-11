@@ -39,6 +39,68 @@ if auto_refresh:
     st.empty()
     st.caption("⏳ Actualizando automáticamente...")
 
+# --- Panel de Detalle Clínico (Arriba del Kanban para acceso rápido) ---
+if st.session_state.get('triaje_en_edicion'):
+    triaje_id = st.session_state['triaje_en_edicion']
+    p = st.session_state.get(f'detalle_{triaje_id}')
+    
+    if p:
+        pnombre_detalle = p.get('paciente_nombre_completo') or p.get('pacienteNombreCompleto', 'Paciente')
+        with st.container():
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: white;">📋 Paciente en Atención: {pnombre_detalle}</h3>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            col_det1, col_det2, col_det3 = st.columns([2, 1, 1])
+            with col_det1:
+                notas_actuales = p.get('notas_medicas') or p.get('notasMedicas', '')
+                nuevas_notas = st.text_area("📝 Notas Médicas:", value=notas_actuales if notas_actuales else "", 
+                                           height=100, key=f"notas_rapidas_{triaje_id}")
+            with col_det2:
+                diagnostico_final = st.text_input("🩺 Diagnóstico Final:", 
+                                                 value=p.get('diagnostico_final') or p.get('diagnosticoFinal') or '',
+                                                 placeholder="Ej: Infarto agudo...",
+                                                 key=f"diag_rapido_{triaje_id}")
+                if not diagnostico_final:
+                    st.caption("⚠️ Requerido para finalizar")
+            with col_det3:
+                st.markdown("<br>", unsafe_allow_html=True)
+                col_g, col_f = st.columns(2)
+                with col_g:
+                    if st.button("💾 Guardar", key=f"guardar_rapido_{triaje_id}", use_container_width=True):
+                        headers = get_auth_headers()
+                        try:
+                            response = requests.put(
+                                f"{API_BASE_URL}/cola-medica/{triaje_id}/notas-medicas",
+                                params={"notas": nuevas_notas, "diagnostico_final": diagnostico_final},
+                                headers=headers
+                            )
+                            if response.status_code == 200:
+                                st.success("✅ Guardado")
+                                st.rerun()
+                            else:
+                                st.error("Error al guardar")
+                        except Exception as e:
+                            st.error(f"Error: {str(e)}")
+                with col_f:
+                    estado_paciente = p.get('estado_logistico') or p.get('estadoLogistico', '')
+                    if estado_paciente == "En Atencion" and diagnostico_final:
+                        if st.button("✅ Finalizar", key=f"finalizar_rapido_{triaje_id}", type="primary", use_container_width=True):
+                            pversion = p.get('version') or p.get('Version') or 1
+                            success, msg = cambiar_estado_triaje(triaje_id, "Atendido", version=pversion)
+                            if success:
+                                st.success("✅ Atención finalizada")
+                                st.session_state['triaje_en_edicion'] = None
+                                st.rerun()
+                            else:
+                                st.error(msg)
+                if st.button("❌ Cerrar panel", key=f"cerrar_{triaje_id}", use_container_width=True):
+                    st.session_state['triaje_en_edicion'] = None
+                    st.rerun()
+            st.markdown("---")
+
 # Función para cargar cola
 def load_cola():
     headers = get_auth_headers()
@@ -118,21 +180,30 @@ for paciente in cola_data:
 for estado in estados:
     pacientes_por_estado[estado].sort(key=lambda p: (get_urgency_priority(p), get_fecha_hora(p)))
 
+# Configurar límites de visualización (para no saturar la UI)
+DEFAULT_VISIBLE = 8  # Mostrar solo los primeros 8 por columna
+if 'mostrar_todos' not in st.session_state:
+    st.session_state['mostrar_todos'] = {estado: False for estado in estados}
+
 # Mostrar Kanban
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     espera_count = len(pacientes_por_estado["En Espera"])
     st.markdown(f"""
-    <div style="background: #FAFAFA; border-radius: 12px; padding: 16px; height: 100%;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #E0E0E0;">
+    <div style="background: #FAFAFA; border-radius: 12px; padding: 16px; max-height: 70vh; overflow-y: auto;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #E0E0E0; position: sticky; top: 0; background: #FAFAFA; z-index: 10;">
             <span style="font-size: 20px;">⏳</span>
             <span style="font-size: 16px; font-weight: 600; color: #424242;">En Espera</span>
             <span style="background: #E0E0E0; color: #616161; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">{espera_count}</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    for p in pacientes_por_estado["En Espera"]:
+    # Limitar pacientes visibles
+    espera_list = pacientes_por_estado["En Espera"]
+    mostrar_todos_espera = st.session_state['mostrar_todos']["En Espera"]
+    visible_espera = espera_list if mostrar_todos_espera else espera_list[:DEFAULT_VISIBLE]
+    for p in visible_espera:
         # Manejar camelCase o snake_case del backend
         nivel = p.get('nivel_urgencia_final') or p.get('nivelUrgenciaFinal') or p.get('nivel_urgencia_asignado_ia') or p.get('nivelUrgenciaAsignadoIa') or 'GREEN'
         color = get_color_for_urgency(nivel)
@@ -166,19 +237,34 @@ with col1:
                     st.session_state['triaje_en_edicion'] = pid
                     st.session_state[f'detalle_{pid}'] = p
             st.markdown("---")
+    # Botón para expandir/contraer si hay más pacientes
+    if len(espera_list) > DEFAULT_VISIBLE:
+        if mostrar_todos_espera:
+            if st.button("⬆️ Mostrar menos", key="toggle_espera", use_container_width=True):
+                st.session_state['mostrar_todos']["En Espera"] = False
+                st.rerun()
+        else:
+            ocultos = len(espera_list) - DEFAULT_VISIBLE
+            if st.button(f"⬇️ Ver {ocultos} más", key="toggle_espera", use_container_width=True):
+                st.session_state['mostrar_todos']["En Espera"] = True
+                st.rerun()
 
 with col2:
     llamado_count = len(pacientes_por_estado["Llamado"])
     st.markdown(f"""
-    <div style="background: #FFF8E1; border-radius: 12px; padding: 16px; height: 100%;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #FFD54F;">
+    <div style="background: #FFF8E1; border-radius: 12px; padding: 16px; max-height: 70vh; overflow-y: auto;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #FFD54F; position: sticky; top: 0; background: #FFF8E1; z-index: 10;">
             <span style="font-size: 20px;">📞</span>
             <span style="font-size: 16px; font-weight: 600; color: #424242;">Llamado</span>
             <span style="background: #FFD54F; color: #424242; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">{llamado_count}</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    for p in pacientes_por_estado["Llamado"]:
+    # Limitar pacientes visibles
+    llamado_list = pacientes_por_estado["Llamado"]
+    mostrar_todos_llamado = st.session_state['mostrar_todos']["Llamado"]
+    visible_llamado = llamado_list if mostrar_todos_llamado else llamado_list[:DEFAULT_VISIBLE]
+    for p in visible_llamado:
         nivel = p.get('nivel_urgencia_final') or p.get('nivelUrgenciaFinal') or p.get('nivel_urgencia_asignado_ia') or p.get('nivelUrgenciaAsignadoIa') or 'GREEN'
         color = get_color_for_urgency(nivel)
         nombre_completo = f"{p.get('paciente_nombre_completo') or p.get('pacienteNombreCompleto', 'N/A')}"
@@ -208,19 +294,34 @@ with col2:
                     st.session_state['justificacion_modal'][pid] = True
                     st.session_state['triaje_devolver'] = p
             st.markdown("---")
+    # Botón para expandir/contraer
+    if len(llamado_list) > DEFAULT_VISIBLE:
+        if mostrar_todos_llamado:
+            if st.button("⬆️ Mostrar menos", key="toggle_llamado", use_container_width=True):
+                st.session_state['mostrar_todos']["Llamado"] = False
+                st.rerun()
+        else:
+            ocultos = len(llamado_list) - DEFAULT_VISIBLE
+            if st.button(f"⬇️ Ver {ocultos} más", key="toggle_llamado", use_container_width=True):
+                st.session_state['mostrar_todos']["Llamado"] = True
+                st.rerun()
 
 with col3:
     atencion_count = len(pacientes_por_estado["En Atencion"])
     st.markdown(f"""
-    <div style="background: #E8F5E9; border-radius: 12px; padding: 16px; height: 100%;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #81C784;">
+    <div style="background: #E8F5E9; border-radius: 12px; padding: 16px; max-height: 70vh; overflow-y: auto;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #81C784; position: sticky; top: 0; background: #E8F5E9; z-index: 10;">
             <span style="font-size: 20px;">🩺</span>
             <span style="font-size: 16px; font-weight: 600; color: #424242;">En Atención</span>
             <span style="background: #81C784; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">{atencion_count}</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    for p in pacientes_por_estado["En Atencion"]:
+    # Limitar pacientes visibles
+    atencion_list = pacientes_por_estado["En Atencion"]
+    mostrar_todos_atencion = st.session_state['mostrar_todos']["En Atencion"]
+    visible_atencion = atencion_list if mostrar_todos_atencion else atencion_list[:DEFAULT_VISIBLE]
+    for p in visible_atencion:
         nivel = p.get('nivel_urgencia_final') or p.get('nivelUrgenciaFinal') or p.get('nivel_urgencia_asignado_ia') or p.get('nivelUrgenciaAsignadoIa') or 'GREEN'
         color = get_color_for_urgency(nivel)
         nombre_completo = f"{p.get('paciente_nombre_completo') or p.get('pacienteNombreCompleto', 'N/A')}"
@@ -256,19 +357,34 @@ with col3:
                         else:
                             st.error(msg)
             st.markdown("---")
+    # Botón para expandir/contraer
+    if len(atencion_list) > DEFAULT_VISIBLE:
+        if mostrar_todos_atencion:
+            if st.button("⬆️ Mostrar menos", key="toggle_atencion", use_container_width=True):
+                st.session_state['mostrar_todos']["En Atencion"] = False
+                st.rerun()
+        else:
+            ocultos = len(atencion_list) - DEFAULT_VISIBLE
+            if st.button(f"⬇️ Ver {ocultos} más", key="toggle_atencion", use_container_width=True):
+                st.session_state['mostrar_todos']["En Atencion"] = True
+                st.rerun()
 
 with col4:
     atendidos_count = len(pacientes_por_estado["Atendido"])
     st.markdown(f"""
-    <div style="background: #E3F2FD; border-radius: 12px; padding: 16px; height: 100%;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #64B5F6;">
+    <div style="background: #E3F2FD; border-radius: 12px; padding: 16px; max-height: 70vh; overflow-y: auto;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #64B5F6; position: sticky; top: 0; background: #E3F2FD; z-index: 10;">
             <span style="font-size: 20px;">✅</span>
             <span style="font-size: 16px; font-weight: 600; color: #424242;">Atendidos</span>
             <span style="background: #64B5F6; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">{atendidos_count}</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    for p in pacientes_por_estado["Atendido"][:5]:  # Solo últimos 5
+    # Limitar pacientes visibles (Atendidos ya tenía límite de 5, ahora configurable)
+    atendidos_list = pacientes_por_estado["Atendido"]
+    mostrar_todos_atendidos = st.session_state['mostrar_todos']["Atendido"]
+    visible_atendidos = atendidos_list if mostrar_todos_atendidos else atendidos_list[:5]  # Solo últimos 5 por defecto
+    for p in visible_atendidos:
         nombre = p.get('paciente_nombre_completo') or p.get('pacienteNombreCompleto', 'N/A')
         fecha = p.get('fecha_hora') or p.get('fechaHora', '')
         tiempo_seg = p.get('tiempo_atencion_segundos') or p.get('tiempoAtencionSegundos')
